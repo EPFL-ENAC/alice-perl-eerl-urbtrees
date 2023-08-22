@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/EPFL-ENAC/alice-perl-eerl-urbtrees/main/schema/parameters.schema.json",
+  "center": { "lat": 46.20, "lng": 6.15 },
+  "zoom": 10,
+  "legendScales": [
+  ],
+  "popupLayerIds": [
+    "quercus_robur"
+  ],
+  "selectableItems": [
+    {
+      "id": "theme",
+      "label": "Theme",
+      "children": [
+        {
+          "id": "classic",
+          "label": "Classic",
+          "selected": false
+        },
+        {
+          "id": "light",
+          "label": "Light",
+          "selected": true
+        },
+        {
+          "id": "dark",
+          "label": "Dark",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "id": "species",
+      "label": "Species",
+      "tab": true,
+      "children": [
+        {
+          "id": "quercus_robur",
+          "ids": ["quercus_robur"],
+          "label": "Quercus Robur",
+          "selected": true
+        }
+      ]
+    }
+  ],
+  "title": "URBTREES",
+  "subtitle": "Disentangling the benefits provided by urban trees for nature-based solution planning: from urban cooling to sociocultural services"
+}

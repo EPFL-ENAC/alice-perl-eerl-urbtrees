@@ -1,0 +1,63 @@
+{
+  "version": 8,
+  "name": "Default Style",
+  "sources": {
+    "osm": {
+      "type": "raster",
+      "tiles": ["https://tile.osm.ch/osm-swiss-style/{z}/{x}/{y}.png"],
+      "tileSize": 256,
+      "minzoom": 0,
+      "maxzoom": 20
+    },
+    "quercus_robur": {
+      "type": "geojson",
+      "data": "https://enacit4r-cdn.epfl.ch/alice-perl-eerl-urbtrees/2023-08-22T13:06/data/quercus_robur.geojson"
+    }
+  },
+  "layers": [
+    { "id": "classic",
+      "type": "raster",
+      "source": "osm",
+      "layout": { "visibility": "none" }
+    },
+    { "id": "light",
+      "type": "raster",
+      "source": "osm",
+      "paint": {
+        "raster-saturation": -0.9,
+        "raster-brightness-min": 0.7
+      }
+    },
+    { "id": "dark",
+      "type": "raster",
+      "source": "osm",
+      "paint": {
+        "raster-saturation": -1,
+        "raster-brightness-max": 0.2
+      },
+      "layout": { "visibility": "none" }
+    },
+    {
+      "id": "quercus_robur",
+      "type": "circle",
+      "source": "quercus_robur",
+      "paint": {
+        "circle-radius": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          11, 1,
+          12, ["*", 0.125, ["number", ["get", "radius"], 5]],
+          13, ["*", 0.25, ["number", ["get", "radius"], 5]],
+          14, ["*", 0.5, ["number", ["get", "radius"], 5]],
+          16, ["number", ["get", "radius"], 5],
+          17, ["*", 2, ["number", ["get", "radius"], 5]],
+          18, ["*", 4, ["number", ["get", "radius"], 5]]
+        ],
+        "circle-color": "#5aaf44",
+        "circle-opacity": 0.5
+      },
+      "layout": { "visibility": "none" }
+    }
+  ]
+}
