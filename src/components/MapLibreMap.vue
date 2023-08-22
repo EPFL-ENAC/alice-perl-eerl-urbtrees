@@ -116,12 +116,10 @@ watch(
         closeOnClick: true
       })
       map?.on('click', layerId, function (e) {
-        console.log(layerId)
         if (map) {
           map.getCanvas().style.cursor = 'pointer'
           const fprops = e.features?.at(0)?.properties
-          console.log(fprops)
-          // display combinations of scenario and ARI for hazard and risk related layers
+          // display tree attributes
           if (fprops) {
             const rows = Object.keys(fprops).map((key) => `<tr><th>${key}</th><td>${fprops[key]}</td></tr>`)
             let html = `<p class="text-overline">${layerId}</p>

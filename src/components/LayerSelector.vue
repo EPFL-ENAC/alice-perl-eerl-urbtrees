@@ -44,7 +44,6 @@ watch(() => props.items,
     }
     // init with first map
     const firstTab = value.filter((item: SelectableItem) => (item as SelectableGroupItem).tab)[0] as SelectableGroupItem
-    console.log(firstTab)
     if (firstTab && firstTab.children)
       tab.value = firstTab.children[0].id      
     updateLayers()
