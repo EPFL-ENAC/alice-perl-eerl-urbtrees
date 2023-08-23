@@ -53,6 +53,13 @@
                 },
                 "unit": {
                     "type": "string"
+                },
+                "range": {
+                    "type": "array",
+                    "maxItems": 2,
+                    "items": {
+                        "type": "number"
+                    }
                 }
             },
             "type": "object"
@@ -60,6 +67,9 @@
         "LegendScale": {
             "properties": {
                 "id": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "scale": {

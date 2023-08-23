@@ -8,10 +8,12 @@ export interface ScaleEntry {
   min?: number
   max?: number
   unit?: string
+  range?: number[]
 }
 
 export interface LegendScale {
   id: string
+  title?: string
   scale: ScaleEntry[]
 }
 

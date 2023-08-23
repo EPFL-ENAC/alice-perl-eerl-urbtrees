@@ -11,7 +11,7 @@
     },
     "quercus_robur": {
       "type": "geojson",
-      "data": "https://enacit4r-cdn.epfl.ch/alice-perl-eerl-urbtrees/2023-08-22T13:06/data/quercus_robur.geojson"
+      "data": "https://enacit4r-cdn.epfl.ch/alice-perl-eerl-urbtrees/2023-08-23T16:17/data/quercus_robur.geojson"
     }
   },
   "layers": [
@@ -46,15 +46,15 @@
           "interpolate",
           ["linear"],
           ["zoom"],
-          12, 1,
-          13, ["*", 0.125, ["number", ["get", "radius"], 5]],
-          14, ["*", 0.25, ["number", ["get", "radius"], 5]],
-          15, ["*", 0.5, ["number", ["get", "radius"], 5]],
-          16, ["number", ["get", "radius"], 5],
-          17, ["*", 2, ["number", ["get", "radius"], 5]],
-          18, ["*", 4, ["number", ["get", "radius"], 5]]
+          13, 2,
+          14, ["*", 0.125, ["number", ["get", "radius"], 5]],
+          15, ["*", 0.25, ["number", ["get", "radius"], 5]],
+          16, ["*", 0.5, ["number", ["get", "radius"], 5]],
+          17, ["number", ["get", "radius"], 5],
+          18, ["*", 2, ["number", ["get", "radius"], 5]],
+          19, ["*", 4, ["number", ["get", "radius"], 5]]
         ],
-        "circle-color": "#5aaf44",
+        "circle-color": ["string", ["get", "color"], "#000000"],
         "circle-opacity": 0.5
       },
       "layout": { "visibility": "none" }
