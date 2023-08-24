@@ -5,7 +5,7 @@
   "legendScales": [
     {
       "id": "voc-scale",
-      "title": "Volatile Organic Compounds (VOC)",
+      "title": "Volatile Organic Compounds (VOC g/year)",
       "scale": [
         {
           "range": [2784.4, 100000.0],
@@ -75,7 +75,7 @@
         },
         {
           "id": "swissimage",
-          "label": "Image",
+          "label": "Aerial",
           "selected": false
         }
       ]
