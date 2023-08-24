@@ -12,6 +12,7 @@ import { storeToRefs } from 'pinia'
 import { useDisplay } from 'vuetify'
 import { computed, onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
 import type { StyleSpecification } from 'maplibre-gl'
+// @ts-ignore
 import Papa from 'papaparse'
 
 const props = defineProps<{
@@ -88,11 +89,17 @@ watch(species, () => {
               ['linear'],
               ['zoom'],
               13, 2,
+              // @ts-ignore
               14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
+              // @ts-ignore
               15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
+              // @ts-ignore
               16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
+              // @ts-ignore
               17, ['number', ['get', 'radius'], 5],
+              // @ts-ignore
               18, ['*', 2, ['number', ['get', 'radius'], 5]],
+              // @ts-ignore
               19, ['*', 4, ['number', ['get', 'radius'], 5]]
             ],
             'circle-color': ['string', ['get', 'color'], '#000000'],
