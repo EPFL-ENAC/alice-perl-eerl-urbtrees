@@ -12,7 +12,7 @@ onMounted(() => {
     .get<string>('about.md')
     .then((response) => response.data)
     .then((data) => {
-      contentHtml.value = DOMPurify.sanitize(marked.parse(data, {headerIds: false}))
+      contentHtml.value = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
     })
 })
 

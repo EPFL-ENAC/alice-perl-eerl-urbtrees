@@ -9,9 +9,9 @@
       "minzoom": 0,
       "maxzoom": 20
     },
-    "quercus_robur": {
-      "type": "geojson",
-      "data": "https://enacit4r-cdn.epfl.ch/alice-perl-eerl-urbtrees/2023-08-23T16:17/data/quercus_robur.geojson"
+    "swissimage": {
+      "type": "raster",
+      "tiles": ["https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage-product/default/current/3857/{z}/{x}/{y}.jpeg"]
     }
   },
   "layers": [
@@ -37,26 +37,9 @@
       },
       "layout": { "visibility": "none" }
     },
-    {
-      "id": "quercus_robur",
-      "type": "circle",
-      "source": "quercus_robur",
-      "paint": {
-        "circle-radius": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          13, 2,
-          14, ["*", 0.125, ["number", ["get", "radius"], 5]],
-          15, ["*", 0.25, ["number", ["get", "radius"], 5]],
-          16, ["*", 0.5, ["number", ["get", "radius"], 5]],
-          17, ["number", ["get", "radius"], 5],
-          18, ["*", 2, ["number", ["get", "radius"], 5]],
-          19, ["*", 4, ["number", ["get", "radius"], 5]]
-        ],
-        "circle-color": ["string", ["get", "color"], "#000000"],
-        "circle-opacity": 0.5
-      },
+    { "id": "swissimage",
+      "type": "raster",
+      "source": "swissimage",
       "layout": { "visibility": "none" }
     }
   ]

@@ -26,7 +26,7 @@ defineExpose({
 })
 const props = withDefaults(
   defineProps<{
-    styleSpec: string | StyleSpecification
+    styleSpec: string | StyleSpecification | undefined
     center?: LngLatLike
     zoom?: number
     scales: LegendScale[]
@@ -58,7 +58,7 @@ let map: Map | undefined = undefined
 onMounted(() => {
   map = new Map({
     container: 'maplibre-map',
-    style: props.styleSpec,
+    style: props.styleSpec || '',
     center: props.center,
     zoom: props.zoom,
     trackResize: true,
@@ -103,7 +103,9 @@ onMounted(() => {
 watch(
   () => props.styleSpec,
   (styleSpec) => {
-    map?.setStyle(styleSpec)
+    if (styleSpec) {
+      map?.setStyle(styleSpec)
+    }
   },
   { immediate: true }
 )
