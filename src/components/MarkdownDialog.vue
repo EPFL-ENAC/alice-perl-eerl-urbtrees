@@ -36,7 +36,7 @@ onMounted(() => {
     .get<string>(props.contentUrl)
     .then((response) => response.data)
     .then((data) => {
-      contentHtml.value = DOMPurify.sanitize(marked.parse(data, {headerIds: false}))
+      contentHtml.value = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
     })
 })
 

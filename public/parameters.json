@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/EPFL-ENAC/alice-perl-eerl-urbtrees/main/schema/parameters.schema.json",
-  "center": { "lat": 46.20, "lng": 6.15 },
-  "zoom": 10,
+  "center": { "lat": 46.20, "lng": 6.17 },
+  "zoom": 12,
   "legendScales": [
     {
       "id": "voc-scale",
@@ -72,6 +72,11 @@
           "id": "dark",
           "label": "Dark",
           "selected": false
+        },
+        {
+          "id": "swissimage",
+          "label": "Image",
+          "selected": false
         }
       ]
     },
@@ -79,15 +84,7 @@
       "id": "species",
       "label": "Species",
       "tab": true,
-      "children": [
-        {
-          "id": "quercus_robur",
-          "ids": ["quercus_robur"],
-          "label": "Quercus Robur",
-          "selected": true,
-          "legendScaleId": "voc-scale"
-        }
-      ]
+      "children": []
     }
   ],
   "title": "URBTREES",
