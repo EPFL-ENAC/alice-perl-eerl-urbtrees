@@ -94,6 +94,10 @@ function getParentLabel(id: string) {
   return parent?.label
 }
 
+function getLegendTitle(id: string): string | undefined {
+  return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.title
+}
+
 function getLegendScale(id: string): ScaleEntry[] | undefined {
   return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.scale
 }
@@ -135,13 +139,40 @@ function showDocumentation(id: string) {
       </v-list-item>
       <v-list-item :prepend-icon="mdiMapLegend">
         <v-list-item-title>
-          <span class="text-h6">Legends</span>
+          <span class="text-h6">Legend</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="!drawerRail">
         <v-card>
           <v-card-text class="pa-0">
-            TODO
+            <v-row>
+              <v-col v-for="(item, index) in legendItems" :key="index" cols="12">
+                <div class="mb-2 text-overline">{{ getParentLabel(item.id) }} ({{ item.label }})</div>
+                <div v-if="item.legend" class="mb-3 text-caption">{{ item.legend }}</div>
+                <div v-if="item.legendScaleId" class="mb-3 text-caption">{{ getLegendTitle(item.legendScaleId) }}</div>
+                <v-img v-if="item.legendImage" :src="item.legendImage" />
+                <v-table v-if="item.legendScaleId" density="compact">
+                  <tbody>
+                    <tr
+                      v-for="entry in getLegendScale(item.legendScaleId)"
+                      :key="entry.color"
+                    >
+                      <td :style="`background-color: ${entry.color}`"></td>
+                      <td>
+                        <div>{{ entry.label }}</div>
+                        <div class="text-caption">
+                          <span v-if="entry.range">{{ entry.range[0] }} - {{ entry.range[1] }}</span>
+                          <span v-if="entry.min === undefined && entry.max !== undefined">{{ entry.max }} &le;</span>
+                          <span v-if="entry.min !== undefined && entry.max !== undefined">{{ entry.min }} - {{ entry.max }}</span>
+                          <span v-if="entry.min !== undefined && entry.max === undefined">&gt; {{ entry.min }}</span>
+                          <span v-if="entry.unit">&nbsp;({{ entry.unit }})</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </v-col>
+            </v-row>
           </v-card-text>
         </v-card>
       </v-list-item>

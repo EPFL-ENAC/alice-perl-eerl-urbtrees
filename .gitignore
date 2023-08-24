@@ -25,6 +25,7 @@ coverage
 *.sln
 *.sw?
 
+data/_symbology
 data/data
 data/input
 data/output

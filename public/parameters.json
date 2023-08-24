@@ -3,6 +3,52 @@
   "center": { "lat": 46.20, "lng": 6.15 },
   "zoom": 10,
   "legendScales": [
+    {
+      "id": "voc-scale",
+      "title": "Volatile Organic Compounds (VOC)",
+      "scale": [
+        {
+          "range": [2784.4, 100000.0],
+          "color": "#440154"
+        },
+        {
+            "range": [807.3, 2784.4],
+            "color": "#482878"
+        },
+        {
+            "range": [538.2, 807.3],
+            "color": "#3e4989"
+        },
+        {
+            "range": [198.5, 538.2],
+            "color": "#31688e"
+        },
+        {
+            "range": [116.8, 198.5],
+            "color": "#26828e"
+        },
+        {
+            "range": [87.2, 116.8],
+            "color": "#1f9e89"
+        },
+        {
+            "range": [51.9, 87.2],
+            "color": "#35b779"
+        },
+        {
+            "range": [23.1, 51.9],
+            "color": "#6ece58"
+        },
+        {
+            "range": [5.1, 23.1],
+            "color": "#b5de2b"
+        },
+        {
+            "range": [0, 5.1],
+            "color": "#fde725"
+        }
+      ]
+    }
   ],
   "popupLayerIds": [
     "quercus_robur"
@@ -38,7 +84,8 @@
           "id": "quercus_robur",
           "ids": ["quercus_robur"],
           "label": "Quercus Robur",
-          "selected": true
+          "selected": true,
+          "legendScaleId": "voc-scale"
         }
       ]
     }
