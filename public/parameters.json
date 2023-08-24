@@ -50,9 +50,7 @@
       ]
     }
   ],
-  "popupLayerIds": [
-    "quercus_robur"
-  ],
+  "popupLayerIds": [],
   "selectableItems": [
     {
       "id": "theme",

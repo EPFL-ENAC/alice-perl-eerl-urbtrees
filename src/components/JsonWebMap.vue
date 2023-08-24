@@ -134,6 +134,7 @@ watch(species, () => {
               genre: genre,
               selected: id === mostFrequentSpecies // most common, default one
             })
+            data.popupLayerIds?.push(id)
           })
           parameters.value = data
           triggerRef(parameters)
