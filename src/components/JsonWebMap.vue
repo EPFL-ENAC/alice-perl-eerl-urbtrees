@@ -18,9 +18,10 @@ import Papa from 'papaparse'
 const props = defineProps<{
   styleUrl: string
   parametersUrl: string
+  cdnUrl: string
 }>()
 
-const CDN_DATA_URL = 'https://enacit4r-cdn.epfl.ch/alice-perl-eerl-urbtrees/2023-08-23T16:17/data'
+const CDN_DATA_URL = `${props.cdnUrl}/data`
 
 const map = ref<InstanceType<typeof MapLibreMap>>()
 const selectedLayerIds = ref<string[]>([])
