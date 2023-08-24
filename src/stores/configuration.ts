@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const useConfigurationStore = defineStore('configuration', () => {
   const envParametersUrl = import.meta.env.VITE_PARAMETERS_URL
   const envStyleUrl = import.meta.env.VITE_STYLE_URL
+  const cdnUrl = import.meta.env.VITE_CDN_URL
 
   const parametersUrl = ref<string>(
     envParametersUrl.startsWith('/')
@@ -13,5 +14,5 @@ export const useConfigurationStore = defineStore('configuration', () => {
   const styleUrl = ref<string>(
     envStyleUrl.startsWith('/') ? import.meta.env.BASE_URL + envStyleUrl : envStyleUrl
   )
-  return { parametersUrl, styleUrl }
+  return { parametersUrl, styleUrl, cdnUrl }
 })
