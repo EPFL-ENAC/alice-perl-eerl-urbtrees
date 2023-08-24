@@ -20,6 +20,7 @@ import {
   type StyleSpecification
 } from 'maplibre-gl'
 import { onMounted, ref, watch } from 'vue'
+import type { SpeciesProps } from '@/utils/layerSelector'
 
 defineExpose({
   update
@@ -120,13 +121,37 @@ watch(
       map?.on('click', layerId, function (e) {
         if (map) {
           map.getCanvas().style.cursor = 'pointer'
-          const fprops = e.features?.at(0)?.properties
+          const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
-            const rows = Object.keys(fprops).map((key) => `<tr><th>${key}</th><td>${fprops[key]}</td></tr>`)
-            let html = `<p class="text-overline">${layerId}</p>
+            let html = `<p class="text-overline">${fprops.NOM_COMPLE}</p>
               <table>
-                ${rows.join('\n')}
+                <tbody>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">leaf</td>
+                  <td>${fprops.leaf}</td>
+                </tr>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">L_area</td>
+                  <td>${fprops.L_area}</td>
+                </tr>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">O3_rm_gy</td>
+                  <td>${fprops.O3_rm_gy}</td>
+                </tr>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">VOC_g_y</td>
+                  <td>${fprops.VOC_g_y}</td>
+                </tr>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">OFP_kg_y</td>
+                  <td>${fprops.OFP_kg_y}</td>
+                </tr>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">PM10_rm_gy</td>
+                  <td>${fprops.PM10_rm_gy}</td>
+                </tr>
+                </tbody>
               </table>`
             popup
               .setLngLat(e.lngLat)

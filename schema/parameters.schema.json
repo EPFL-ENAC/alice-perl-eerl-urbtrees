@@ -89,6 +89,12 @@
                 "label": {
                     "type": "string"
                 },
+                "label_en": {
+                    "type": "string"
+                },
+                "label_fr": {
+                    "type": "string"
+                },
                 "selected": {
                     "type": "boolean"
                 },
@@ -98,7 +104,9 @@
                     },
                     "type": "array"
                 },
-                "legend": {
+                "genre": {
+                    "type": "string"
+                },"legend": {
                     "type": "string"
                 },
                 "legendImage": {

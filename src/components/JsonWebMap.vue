@@ -128,6 +128,8 @@ watch(species, () => {
               id: id,
               ids: [id],
               label: item.NOM_COMPLET_lat,
+              label_en: item.NOM_COMPLET_eng,
+              label_fr: item.NOM_COMPLET_fr,
               legendScaleId: 'voc-scale',
               genre: genre,
               selected: id === mostFrequentSpecies // most common, default one
@@ -185,6 +187,21 @@ function getLegendScale(id: string): ScaleEntry[] | undefined {
   return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.scale
 }
 
+function getLegendScaleEntryCaption(entry: ScaleEntry): string {
+  let rval = ''
+  if (entry.range)
+    rval = `${entry.range[0]} - ${entry.range[1]}`
+  if (entry.min === undefined && entry.max !== undefined)
+    rval = `${entry.max} <=`
+  if (entry.min !== undefined && entry.max !== undefined)
+    rval = `${entry.min} - ${entry.max}`
+  if (entry.min !== undefined && entry.max === undefined)
+    rval = `> ${entry.min}`
+  if (entry.unit)
+    rval = `${rval} (${entry.unit })`
+  return rval
+}
+
 function showDocumentation(id: string) {
   if (docId.value === id) {
     drawerRight.value = !drawerRight.value
@@ -202,7 +219,7 @@ function showDocumentation(id: string) {
 </script>
 
 <template>
-  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 200 : 300" @click="drawerRail = false">
+  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 200 : 350" @click="drawerRail = false">
     <v-list density="compact" nav>
       <v-list-item :prepend-icon="drawerRail ? mdiChevronRight : undefined">
         <template #append>
@@ -231,9 +248,17 @@ function showDocumentation(id: string) {
           <v-card-text class="pa-0">
             <v-row>
               <v-col v-for="(item, index) in legendItems" :key="index" cols="12">
-                <div class="mb-2 text-overline">{{ getParentLabel(item.id) }} ({{ item.label }})</div>
+                <div class="mb-2 text-overline">{{ getParentLabel(item.id) }} - {{ item.label }}</div>
+                <div class="mb-1">
+                  <v-chip>en</v-chip>
+                  <span class="pl-2">{{ item.label_en }}</span>
+                </div>
+                <div class="mb-2">
+                  <v-chip>fr</v-chip>
+                  <span class="pl-2">{{ item.label_fr }}</span>
+                </div>
                 <div v-if="item.legend" class="mb-3 text-caption">{{ item.legend }}</div>
-                <div v-if="item.legendScaleId" class="mb-3 text-caption">{{ getLegendTitle(item.legendScaleId) }}</div>
+                <div v-if="item.legendScaleId" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(item.legendScaleId) }}</div>
                 <v-img v-if="item.legendImage" :src="item.legendImage" />
                 <v-table v-if="item.legendScaleId" density="compact">
                   <tbody>
@@ -245,11 +270,7 @@ function showDocumentation(id: string) {
                       <td>
                         <div>{{ entry.label }}</div>
                         <div class="text-caption">
-                          <span v-if="entry.range">{{ entry.range[0] }} - {{ entry.range[1] }}</span>
-                          <span v-if="entry.min === undefined && entry.max !== undefined">{{ entry.max }} &le;</span>
-                          <span v-if="entry.min !== undefined && entry.max !== undefined">{{ entry.min }} - {{ entry.max }}</span>
-                          <span v-if="entry.min !== undefined && entry.max === undefined">&gt; {{ entry.min }}</span>
-                          <span v-if="entry.unit">&nbsp;({{ entry.unit }})</span>
+                          {{ getLegendScaleEntryCaption(entry) }}
                         </div>
                       </td>
                     </tr>
