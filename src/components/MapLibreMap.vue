@@ -122,9 +122,13 @@ watch(
           const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
-            let html = `<p class="text-overline">${fprops.NOM_COMPLE}</p>
+            let html = `<p class="text-overline">${fprops.NOM_COMPLET_lat} (${fprops.NOM_COMPLET_eng})</p>
               <table>
                 <tbody>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">Municipality</td>
+                  <td>${fprops.COMMUNE}</td>
+                </tr>
                 <tr>
                   <td class="text-caption font-weight-bold text-left pr-1">Leaf type</td>
                   <td>${fprops.leaf}</td>

@@ -58,7 +58,10 @@ export interface SpeciesItem {
 
 // from geojson
 export interface SpeciesProps {
-  NOM_COMPLE: string
+  NOM_COMPLET_lat: string
+  NOM_COMPLET_fr: string
+  NOM_COMPLET_eng: string
+  COMMUNE: string
   REMARQUABL: string
   SITUATION: string
   TYPE_PLANT: string

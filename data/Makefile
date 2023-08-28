@@ -10,7 +10,9 @@ transform:
 cdn: cdn-data
 
 cdn-data:
-	mkdir -p data && cp input/*_pt.geojson data && cp output/*geojson data && \
+	mkdir -p data && \
+	cp input/*/specie/*/*_graph.png data && \
+	cp output/*geojson data && \
 	s3cmd put --recursive --acl-public --guess-mime-type data s3://${bucket}/alice-perl-eerl-urbtrees/${version}/
 
 cdn-ls:

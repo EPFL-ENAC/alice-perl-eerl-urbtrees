@@ -180,7 +180,7 @@ colors = {
 
 def transform(filePath):
     fileName = os.path.basename(filePath)
-    baseName = fileName.replace(".geojson", "").replace("_pt", "")
+    baseName = fileName.replace(".geojson", "").replace("_voc", "").replace("specie_", "")
 
     print(f"Transforming {fileName}")
 
@@ -267,18 +267,26 @@ def transform(filePath):
                 radius = math.sqrt(fieldValue/3.14159)
             elif fieldName == "VOC_g_y":
                 fieldValue = inFeature.GetField(i)
+                if fieldValue == None:
+                    fieldValue = 0
                 scheme = [d for d in colors["voc"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
                 color["voc"] = scheme[0]["color"]
             elif fieldName == "O3_rm_gy":
                 fieldValue = inFeature.GetField(i)
+                if fieldValue == None:
+                    fieldValue = 0
                 scheme = [d for d in colors["o3"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
                 color["o3"] = scheme[0]["color"]
             elif fieldName == "OFP_kg_y":
                 fieldValue = inFeature.GetField(i)
+                if fieldValue == None:
+                    fieldValue = 0
                 scheme = [d for d in colors["ofp"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
                 color["ofp"] = scheme[0]["color"]
             elif fieldName == "PM10_rm_gy":
                 fieldValue = inFeature.GetField(i)
+                if fieldValue == None:
+                    fieldValue = 0
                 scheme = [d for d in colors["pm10"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
                 color["pm10"] = scheme[0]["color"]
         # set the attributes
@@ -310,5 +318,5 @@ def transform(filePath):
     outDataSet.Destroy()
 
 # main
-for file in glob.glob("./input/*_pt.geojson"):
+for file in glob.glob("./input/*/specie/*/*_voc.geojson"):
     transform(file)

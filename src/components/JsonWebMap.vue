@@ -3,7 +3,7 @@ import LayerSelector from '@/components/LayerSelector.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
 import { useTitleStore } from '@/stores/title'
 import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
-import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant } from '@mdi/js'
+import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew } from '@mdi/js'
 import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import axios from 'axios'
 import { marked } from 'marked'
@@ -27,6 +27,9 @@ const map = ref<InstanceType<typeof MapLibreMap>>()
 const selectedLayerIds = ref<string[]>([])
 const style = shallowRef<StyleSpecification>()
 const parameters = shallowRef<Parameters>({})
+const legendDialog = ref(false)
+const legendDialogTitle = ref<string>()
+const legendDialogImageSrc = ref<string>()
 const drawerRail = ref(false)
 const drawerRight = ref(false)
 const drawerHtml = ref('')
@@ -35,9 +38,7 @@ const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 const { title, subtitle } = storeToRefs(useTitleStore())
 
-const documentationIds = [
-  'trees'
-]
+const documentationIds: string[] = [] // TODO not available for now
 
 const species = ref<SpeciesItem[]>([])
 
@@ -140,15 +141,15 @@ watch(species, () => {
               ['zoom'],
               14, 1,
               // @ts-ignore
-              15, ['*', 0.125, ['number', ['get', 'DIAMETRE_C'], 5]],
+              15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
               // @ts-ignore
-              16, ['*', 0.25, ['number', ['get', 'DIAMETRE_C'], 5]],
+              16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
               // @ts-ignore
-              17, ['*', 0.5, ['number', ['get', 'DIAMETRE_C'], 5]],
+              17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
               // @ts-ignore
-              18, ['number', ['get', 'DIAMETRE_C'], 5],
+              18, ['number', ['get', 'D_COUR_M'], 5],
               // @ts-ignore
-              19, ['*', 2, ['number', ['get', 'DIAMETRE_C'], 5]]
+              19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
             ],
             'circle-color': '#aaaaaa',
             'circle-opacity': 0.3,
@@ -178,7 +179,7 @@ watch(species, () => {
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_eng,
               label_fr: item.NOM_COMPLET_fr,
-              legendImage: `${CDN_DATA_URL}/${item.id}_graph.png`,
+              legendImage: `${CDN_DATA_URL}/specie_${item.id}_graph.png`,
               measures: item.measures,
               genre: item.genus,
               selected: item.id === mostFrequentSpecies // most common, default one
@@ -223,6 +224,12 @@ const scale = computed<string | undefined>(() => {
   const scaleIds: string[] = parameters.value.legendScales.map((scl) => scl.id)
   return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds.includes(scl)).pop()
 })
+
+function onOpenLegendDialog(item: SelectableSingleItem) {
+  legendDialogTitle.value = item.label
+  legendDialogImageSrc.value = item.legendImage
+  legendDialog.value = true
+}
 
 function getParent(id: string): SelectableItem | undefined {
   return (parameters.value.selectableItems ?? [])
@@ -312,10 +319,19 @@ function showDocumentation(id: string) {
           <v-card-text class="pa-0">
             <v-row>
               <v-col v-for="(item, index) in legendItems" :key="index" cols="12">
-                <div class="mb-2 text-overline">{{ getParentLabel(item.id) }} - {{ item.label }}</div>
+                <div class="mb-2 text-overline">{{ item.label }} ({{ item.label_en }})</div>
                 <div v-if="item.legend" class="mb-3 text-caption">{{ item.legend }}</div>
                 
-                <v-img v-if="item.legendImage" :src="item.legendImage" />
+                <div v-if="item.legendImage" class="mb-3">
+                  <v-btn
+                    :icon="mdiOpenInNew"
+                    size="xsmall"
+                    flat
+                    @click="onOpenLegendDialog(item)"
+                  >
+                  </v-btn>
+                  <v-img :src="item.legendImage" @click="onOpenLegendDialog(item)"/>
+                </div>
                 <div v-if="scale" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(scale) }}</div>
                 <v-table v-if="scale" density="compact">
                   <tbody>
@@ -338,14 +354,14 @@ function showDocumentation(id: string) {
           </v-card-text>
         </v-card>
       </v-list-item>
-      <v-list-item :prepend-icon="mdiBookOpenPageVariant">
+      <v-list-item v-if="documentationIds.length>0" :prepend-icon="mdiBookOpenPageVariant">
         <v-list-item-title>
           <span class="text-h6">Documentation</span>
         </v-list-item-title>
       </v-list-item>
-      <v-list-item v-if="!drawerRail">
-        <div>
-          <v-btn variant="text" class="text-none" @click="showDocumentation('trees')">Trees</v-btn>
+      <v-list-item v-if="documentationIds.length>0 && !drawerRail">
+        <div v-for="doc of documentationIds" :key="doc">
+          <v-btn variant="text" class="text-none" @click="showDocumentation(doc)">{{ doc }}</v-btn>
         </div>
       </v-list-item>
     </v-list>
@@ -379,6 +395,30 @@ function showDocumentation(id: string) {
         />
       </v-col>
     </v-row>
+
+    <v-dialog
+      v-model="legendDialog"
+      fullscreen
+    >
+      <v-card>
+        <v-toolbar
+          color="grey-lighten-4"
+        >
+          <v-btn
+            :icon="mdiClose"
+            @click="legendDialog = false"
+          >
+          </v-btn>
+          <v-toolbar-title>
+            {{ legendDialogTitle }}
+          </v-toolbar-title>
+        </v-toolbar>
+        <v-card-text>
+          <v-img :src="legendDialogImageSrc"/>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
