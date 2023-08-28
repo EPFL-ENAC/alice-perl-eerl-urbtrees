@@ -226,7 +226,7 @@ const scale = computed<string | undefined>(() => {
 })
 
 function onOpenLegendDialog(item: SelectableSingleItem) {
-  legendDialogTitle.value = item.label
+  legendDialogTitle.value = `${item.label} (${item.label_en})`
   legendDialogImageSrc.value = item.legendImage
   legendDialog.value = true
 }
