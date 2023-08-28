@@ -72,6 +72,9 @@
                 "title": {
                     "type": "string"
                 },
+                "unit": {
+                    "type": "string"
+                },
                 "scale": {
                     "items": {
                         "$ref": "#/definitions/ScaleEntry"
@@ -99,6 +102,12 @@
                     "type": "boolean"
                 },
                 "ids": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "measures": {
                     "items": {
                         "type": "string"
                     },

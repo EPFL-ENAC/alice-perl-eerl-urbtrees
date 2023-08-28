@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LegendScale } from '@/utils/jsonWebMap'
 import type { SelectableItem, SelectableGroupItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import { watch, ref, computed } from 'vue'
 
@@ -6,7 +7,8 @@ const props = withDefaults(
   defineProps<{
     modelValue?: string[]
     items?: SelectableItem[],
-    species: SpeciesItem[]
+    species: SpeciesItem[],
+    scales: LegendScale[]
   }>(),
   {
     modelValue: () => [],
@@ -37,6 +39,12 @@ const tabItems = computed<SelectableItem[]>(() =>
     .flatMap((item: SelectableItem) => (item as SelectableGroupItem).children)
     .filter((item: SelectableSingleItem) => item.genre === genre.value) // filter species by selected genre
 )
+const selectedTab = computed<SelectableSingleItem | undefined>(() =>
+  tabItems.value.find((item) => item.id === tab.value) as SelectableSingleItem
+)
+
+const scale = ref<string>()
+const scaleItems = computed<LegendScale[]>(() => props.scales?.filter((scl) => selectedTab.value && selectedTab.value.measures.includes(scl.id)))
 
 watch(genre, () => {
   // select the default species or the first one
@@ -44,7 +52,16 @@ watch(genre, () => {
   tab.value = selected ? selected.id : tabItems.value[0].id
 })
 
-watch([themeIdx, tab], () => {
+watch(tab, () => {
+  if (scaleItems.value && scaleItems.value.length > 0) {
+    scale.value = scaleItems.value[0].id
+  } else {
+    scale.value = undefined
+  }
+  updateLayers()
+})
+
+watch([themeIdx, scale], () => {
   updateLayers()
 })
 
@@ -69,6 +86,17 @@ watch(() => props.items,
   { immediate: true }
 )
 
+watch(() => props.scales,
+  (value: LegendScale[]) => {
+    if (value) {
+      scale.value = value[0].id
+    }
+    updateLayers()
+  },
+  { immediate: true }
+)
+
+
 function updateLayers() {
   const sels = []
   if (themeIdx.value !== undefined) {
@@ -78,6 +106,9 @@ function updateLayers() {
     const map = tabItems.value.filter((item: SelectableItem) => item.id === tab.value).pop()
     if (map) {
       sels.push(map.id)
+      if (scale.value) {
+        sels.push(`${map.id}_${scale.value}`)
+      }
     }
   }
   emit('update:modelValue', sels)
@@ -114,6 +145,15 @@ function updateLayers() {
           label="Species"
           :items="tabItems"
           item-title="label"
+          item-value="id"
+          density="compact"
+          class="mt-2"
+        ></v-select>
+        <v-select
+          v-model="scale"
+          label="Measure"
+          :items="scaleItems"
+          item-title="title"
           item-value="id"
           density="compact"
           class="mt-2"

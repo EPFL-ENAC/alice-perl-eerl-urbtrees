@@ -14,6 +14,7 @@ export interface ScaleEntry {
 export interface LegendScale {
   id: string
   title?: string
+  unit?: string
   scale: ScaleEntry[]
 }
 
@@ -45,5 +46,5 @@ export interface Parameters {
   /**
    * Legend scales
    */
-  legendScales?: LegendScale[]
+  legendScales: LegendScale[]
 }

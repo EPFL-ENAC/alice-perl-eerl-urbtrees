@@ -20,7 +20,8 @@ export interface SelectableSingleItem extends SelectableParentItem {
   label_fr: string
   legend?: string
   legendImage?: string
-  legendScaleId?: string
+  legendScaleId?: string,
+  measures: string[]
 }
 export interface SelectableGroupItem extends SelectableParentItem {
   id: string
@@ -49,6 +50,10 @@ export interface SpeciesItem {
   sum_PM10_kg: number
   mean_PM10_kg: number
   Net_O3: number
+  // derived properties
+  id: string
+  genus: string
+  measures: string[]
 }
 
 // from geojson

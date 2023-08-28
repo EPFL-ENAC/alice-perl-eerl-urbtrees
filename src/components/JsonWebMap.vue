@@ -35,7 +35,6 @@ const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 const { title, subtitle } = storeToRefs(useTitleStore())
 
-
 const documentationIds = [
   'trees'
 ]
@@ -63,6 +62,24 @@ onMounted(() => {
         complete: function(results: any) {
           species.value = results.data
             .filter((row: SpeciesItem) => row['GENRE_lat'] !== null)
+            .map((row: SpeciesItem) => {
+              row.id = row.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
+              row.genus = row.GENRE_lat.toLowerCase().replace(' ', '_')
+              row.measures = []
+              if (row.mean_BVOC_kg) {
+                row.measures.push('voc')
+              }
+              if (row.mean_O3_kg) {
+                row.measures.push('o3')
+              }
+              if (row.mean_OFP_kg) {
+                row.measures.push('ofp')
+              }
+              if (row.mean_PM10_kg) {
+                row.measures.push('pm10')
+              }
+              return row
+            })
         }
       })
     })  
@@ -75,36 +92,69 @@ watch(species, () => {
     .then((data) => {
       // append source/layer for each species read from the csv
       species.value.forEach((item) => {
-        const id = item.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
-        data.sources[id] = {
+        // one source for each specie
+        data.sources[item.id] = {
           type: 'geojson',
-          data: `${CDN_DATA_URL}/${id}.geojson`
+          data: `${CDN_DATA_URL}/${item.id}.geojson`
         }
+        // folliage layers
+        item.measures.forEach((measure) => {
+          data.layers.push({
+            id: `${item.id}_${measure}`,
+            source: item.id,
+            type: 'circle',
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                13, 2,
+                // @ts-ignore
+                14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                17, ['number', ['get', 'radius'], 5],
+                // @ts-ignore
+                18, ['*', 2, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                19, ['*', 4, ['number', ['get', 'radius'], 5]]
+              ],
+              'circle-color': ['string', ['get', `color_${measure}`], '#000000'],
+              'circle-opacity': 0.7
+            },
+            layout: { visibility: 'none' }
+          })
+        })
+        // crown layer
         data.layers.push({
-          id: id,
-          source: id,
+          id: item.id,
+          source: item.id,
           type: 'circle',
           paint: {
             'circle-radius': [
               'interpolate',
               ['linear'],
               ['zoom'],
-              13, 2,
+              14, 1,
               // @ts-ignore
-              14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
+              15, ['*', 0.125, ['number', ['get', 'DIAMETRE_C'], 5]],
               // @ts-ignore
-              15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
+              16, ['*', 0.25, ['number', ['get', 'DIAMETRE_C'], 5]],
               // @ts-ignore
-              16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
+              17, ['*', 0.5, ['number', ['get', 'DIAMETRE_C'], 5]],
               // @ts-ignore
-              17, ['number', ['get', 'radius'], 5],
+              18, ['number', ['get', 'DIAMETRE_C'], 5],
               // @ts-ignore
-              18, ['*', 2, ['number', ['get', 'radius'], 5]],
-              // @ts-ignore
-              19, ['*', 4, ['number', ['get', 'radius'], 5]]
+              19, ['*', 2, ['number', ['get', 'DIAMETRE_C'], 5]]
             ],
-            'circle-color': ['string', ['get', 'color'], '#000000'],
-            'circle-opacity': 0.7
+            'circle-color': '#aaaaaa',
+            'circle-opacity': 0.3,
+            'circle-stroke-color': '#888888',
+            'circle-stroke-width': 1,
+            'circle-stroke-opacity': 0.3
           },
           layout: { visibility: 'none' }
         })
@@ -122,19 +172,19 @@ watch(species, () => {
           const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
           const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
           species.value.forEach((item) => {
-            const id = item.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
-            const genre = item.GENRE_lat.toLowerCase().replace(' ', '_')
             speciesItem.children.push({
-              id: id,
-              ids: [id],
+              id: item.id,
+              ids: [item.id],
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_eng,
               label_fr: item.NOM_COMPLET_fr,
-              legendScaleId: 'voc-scale',
-              genre: genre,
-              selected: id === mostFrequentSpecies // most common, default one
+              legendImage: `${CDN_DATA_URL}/${item.id}_graph.png`,
+              measures: item.measures,
+              genre: item.genus,
+              selected: item.id === mostFrequentSpecies // most common, default one
             })
-            data.popupLayerIds?.push(id)
+            data.popupLayerIds?.push(item.id)
+            item.measures.forEach((measure) => data.popupLayerIds?.push(`${item.id}_${measure}`))
           })
           parameters.value = data
           triggerRef(parameters)
@@ -169,6 +219,11 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
   return ids
 })
 
+const scale = computed<string | undefined>(() => {
+  const scaleIds: string[] = parameters.value.legendScales.map((scl) => scl.id)
+  return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds.includes(scl)).pop()
+})
+
 function getParent(id: string): SelectableItem | undefined {
   return (parameters.value.selectableItems ?? [])
     .find((item: SelectableItem) => (item as SelectableGroupItem).children 
@@ -181,7 +236,14 @@ function getParentLabel(id: string) {
 }
 
 function getLegendTitle(id: string): string | undefined {
-  return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.title
+  const scale = parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)
+  if (scale) { 
+    if (scale.unit) {
+      return `${scale.title} (${scale.unit})`
+    }
+    return scale.title
+  }
+  return undefined
 }
 
 function getLegendScale(id: string): ScaleEntry[] | undefined {
@@ -237,6 +299,7 @@ function showDocumentation(id: string) {
           v-model="selectedLayerIds"
           :items="parameters.selectableItems"
           :species="species"
+          :scales="parameters.legendScales"
         />
       </v-list-item>
       <v-list-item v-if="legendItems.length" :prepend-icon="mdiMapLegend">
@@ -250,21 +313,14 @@ function showDocumentation(id: string) {
             <v-row>
               <v-col v-for="(item, index) in legendItems" :key="index" cols="12">
                 <div class="mb-2 text-overline">{{ getParentLabel(item.id) }} - {{ item.label }}</div>
-                <div class="mb-1">
-                  <v-chip>en</v-chip>
-                  <span class="pl-2">{{ item.label_en }}</span>
-                </div>
-                <div class="mb-2">
-                  <v-chip>fr</v-chip>
-                  <span class="pl-2">{{ item.label_fr }}</span>
-                </div>
                 <div v-if="item.legend" class="mb-3 text-caption">{{ item.legend }}</div>
-                <div v-if="item.legendScaleId" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(item.legendScaleId) }}</div>
+                
                 <v-img v-if="item.legendImage" :src="item.legendImage" />
-                <v-table v-if="item.legendScaleId" density="compact">
+                <div v-if="scale" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(scale) }}</div>
+                <v-table v-if="scale" density="compact">
                   <tbody>
                     <tr
-                      v-for="entry in getLegendScale(item.legendScaleId)"
+                      v-for="entry in getLegendScale(scale)"
                       :key="entry.color"
                     >
                       <td :style="`background-color: ${entry.color}`"></td>
@@ -320,7 +376,6 @@ function showDocumentation(id: string) {
           :selected-layer-ids="extendedSelectedLayerIds"
           :popup-layer-ids="parameters.popupLayerIds"
           :zoom="parameters.zoom"
-          :scales="parameters.legendScales"
         />
       </v-col>
     </v-row>
