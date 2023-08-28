@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LegendScale } from '@/utils/jsonWebMap'
 import type { SelectableItem, SelectableGroupItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import { watch, ref, computed } from 'vue'
 
@@ -6,11 +7,13 @@ const props = withDefaults(
   defineProps<{
     modelValue?: string[]
     items?: SelectableItem[],
+    scales?: LegendScale[],
     species: SpeciesItem[]
   }>(),
   {
     modelValue: () => [],
-    items: () => []
+    items: () => [],
+    scales: () => []
   }
 )
 const emit = defineEmits<{
@@ -26,25 +29,51 @@ const themeItems = computed<any[]>(() =>
 const genre = ref<string>()
 const genreItems = computed<any[]>(() =>
   props.species
-    .map((item) => item.GENRE_lat)
-    .filter((value, index, array) => array.indexOf(value) === index)
-    .map((g) => { return { id: g.toLowerCase().replace(' ', '_'), label: g }})
+    .filter((value, index, array) => array.map((g) => g.GENRE_lat).indexOf(value.GENRE_lat) === index)
+    .map((g) => { return { id: g.GENRE_lat.toLowerCase().replace(' ', '_'), label: `${g.GENRE_lat} (${g.GENRE_eng})` }})
 )
 
 const tab = ref<string>()
-const tabItems = computed<SelectableItem[]>(() =>
+const selectableTabs = computed<SelectableItem[]>(() =>
   props.items?.filter((item: SelectableItem) => (item as SelectableGroupItem).tab)
     .flatMap((item: SelectableItem) => (item as SelectableGroupItem).children)
     .filter((item: SelectableSingleItem) => item.genre === genre.value) // filter species by selected genre
 )
+const selectedTab = computed<SelectableSingleItem | undefined>(() =>
+  selectableTabs.value.find((item) => item.id === tab.value) as SelectableSingleItem
+)
+const tabItems = computed(() => selectableTabs.value.map((item) => {
+  return {
+    id: item.id,
+    label: `${item.label} (${(item as SelectableSingleItem).label_en})`
+  }
+}))
+
+const scale = ref<string>()
+const scaleItems = computed<LegendScale[]>(() => props.scales?.filter((scl) => selectedTab.value && selectedTab.value.measures.includes(scl.id)))
 
 watch(genre, () => {
   // select the default species or the first one
-  const selected = tabItems.value.find((item: SelectableItem) => item.selected)
-  tab.value = selected ? selected.id : tabItems.value[0].id
+  const selected = selectableTabs.value.find((item: SelectableItem) => item.selected)
+  tab.value = selected ? selected.id : selectableTabs.value[0].id
 })
 
-watch([themeIdx, tab], () => {
+watch(tab, () => {
+  if (scaleItems.value && scaleItems.value.length > 0) {
+    // keep current scale selection if it is valid or set the first one
+    const selectedScale = scaleItems.value.find((scl) => scl.id === scale.value)
+    if (selectedScale) {
+      scale.value = selectedScale.id
+    } else {
+      scale.value = scaleItems.value[0].id
+    }
+  } else {
+    scale.value = undefined
+  }
+  updateLayers()
+})
+
+watch([themeIdx, scale], () => {
   updateLayers()
 })
 
@@ -69,15 +98,29 @@ watch(() => props.items,
   { immediate: true }
 )
 
+watch(() => props.scales,
+  (value: LegendScale[]) => {
+    if (value && value.length>0) {
+      scale.value = value[0].id
+    }
+    updateLayers()
+  },
+  { immediate: true }
+)
+
+
 function updateLayers() {
   const sels = []
   if (themeIdx.value !== undefined) {
     sels.push(themeItems.value[themeIdx.value].id)
   }
   if (tab.value) { 
-    const map = tabItems.value.filter((item: SelectableItem) => item.id === tab.value).pop()
+    const map = selectableTabs.value.filter((item: SelectableItem) => item.id === tab.value).pop()
     if (map) {
       sels.push(map.id)
+      if (scale.value) {
+        sels.push(`${map.id}_${scale.value}`)
+      }
     }
   }
   emit('update:modelValue', sels)
@@ -102,7 +145,7 @@ function updateLayers() {
         <div class="mb-2 text-overline">Trees</div>
         <v-select
           v-model="genre"
-          label="Genre"
+          label="Genus"
           :items="genreItems"
           item-title="label"
           item-value="id"
@@ -111,9 +154,18 @@ function updateLayers() {
         ></v-select>
         <v-select
           v-model="tab"
-          label="Species"
+          label="Specie"
           :items="tabItems"
           item-title="label"
+          item-value="id"
+          density="compact"
+          class="mt-2"
+        ></v-select>
+        <v-select
+          v-model="scale"
+          label="Measure"
+          :items="scaleItems"
+          item-title="title"
           item-value="id"
           density="compact"
           class="mt-2"

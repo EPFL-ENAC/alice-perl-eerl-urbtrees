@@ -30,7 +30,6 @@ const props = withDefaults(
     styleSpec: string | StyleSpecification | undefined
     center?: LngLatLike
     zoom?: number
-    scales: LegendScale[]
     aspectRatio?: number
     minZoom?: number
     maxZoom?: number
@@ -42,7 +41,6 @@ const props = withDefaults(
   {
     center: undefined,
     zoom: 12,
-    scales: () => [],
     aspectRatio: undefined,
     minZoom: undefined,
     maxZoom: undefined,
@@ -124,9 +122,13 @@ watch(
           const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
-            let html = `<p class="text-overline">${fprops.NOM_COMPLE}</p>
+            let html = `<p class="text-overline">${fprops.NOM_COMPLET_lat} (${fprops.NOM_COMPLET_eng})</p>
               <table>
                 <tbody>
+                <tr>
+                  <td class="text-caption font-weight-bold text-left pr-1">Municipality</td>
+                  <td>${fprops.COMMUNE}</td>
+                </tr>
                 <tr>
                   <td class="text-caption font-weight-bold text-left pr-1">Leaf type</td>
                   <td>${fprops.leaf}</td>
@@ -136,7 +138,7 @@ watch(
                   <td>${fprops.L_area}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">O3 rm gy</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">O<sub>3</sub> g/year</td>
                   <td>${fprops.O3_rm_gy}</td>
                 </tr>
                 <tr>
@@ -148,7 +150,7 @@ watch(
                   <td>${fprops.OFP_kg_y}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">PM10 rm gy</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">PM10 g/year</td>
                   <td>${fprops.PM10_rm_gy}</td>
                 </tr>
                 </tbody>

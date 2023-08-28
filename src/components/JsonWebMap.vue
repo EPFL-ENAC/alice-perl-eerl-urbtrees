@@ -3,7 +3,7 @@ import LayerSelector from '@/components/LayerSelector.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
 import { useTitleStore } from '@/stores/title'
 import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
-import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant } from '@mdi/js'
+import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew } from '@mdi/js'
 import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import axios from 'axios'
 import { marked } from 'marked'
@@ -26,7 +26,10 @@ const CDN_DATA_URL = `${props.cdnUrl}/data`
 const map = ref<InstanceType<typeof MapLibreMap>>()
 const selectedLayerIds = ref<string[]>([])
 const style = shallowRef<StyleSpecification>()
-const parameters = shallowRef<Parameters>({})
+const parameters = shallowRef<Parameters>()
+const legendDialog = ref(false)
+const legendDialogTitle = ref<string>()
+const legendDialogImageSrc = ref<string>()
 const drawerRail = ref(false)
 const drawerRight = ref(false)
 const drawerHtml = ref('')
@@ -35,10 +38,7 @@ const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 const { title, subtitle } = storeToRefs(useTitleStore())
 
-
-const documentationIds = [
-  'trees'
-]
+const documentationIds: string[] = [] // TODO not available for now
 
 const species = ref<SpeciesItem[]>([])
 
@@ -63,6 +63,24 @@ onMounted(() => {
         complete: function(results: any) {
           species.value = results.data
             .filter((row: SpeciesItem) => row['GENRE_lat'] !== null)
+            .map((row: SpeciesItem) => {
+              row.id = row.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
+              row.genus = row.GENRE_lat.toLowerCase().replace(' ', '_')
+              row.measures = []
+              if (row.mean_BVOC_kg) {
+                row.measures.push('voc')
+              }
+              if (row.mean_O3_kg) {
+                row.measures.push('o3')
+              }
+              if (row.mean_OFP_kg) {
+                row.measures.push('ofp')
+              }
+              if (row.mean_PM10_kg) {
+                row.measures.push('pm10')
+              }
+              return row
+            })
         }
       })
     })  
@@ -75,36 +93,69 @@ watch(species, () => {
     .then((data) => {
       // append source/layer for each species read from the csv
       species.value.forEach((item) => {
-        const id = item.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
-        data.sources[id] = {
+        // one source for each specie
+        data.sources[item.id] = {
           type: 'geojson',
-          data: `${CDN_DATA_URL}/${id}.geojson`
+          data: `${CDN_DATA_URL}/${item.id}.geojson`
         }
+        // folliage layers
+        item.measures.forEach((measure) => {
+          data.layers.push({
+            id: `${item.id}_${measure}`,
+            source: item.id,
+            type: 'circle',
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                13, 2,
+                // @ts-ignore
+                14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                17, ['number', ['get', 'radius'], 5],
+                // @ts-ignore
+                18, ['*', 2, ['number', ['get', 'radius'], 5]],
+                // @ts-ignore
+                19, ['*', 4, ['number', ['get', 'radius'], 5]]
+              ],
+              'circle-color': ['string', ['get', `color_${measure}`], '#000000'],
+              'circle-opacity': 0.7
+            },
+            layout: { visibility: 'none' }
+          })
+        })
+        // crown layer
         data.layers.push({
-          id: id,
-          source: id,
+          id: item.id,
+          source: item.id,
           type: 'circle',
           paint: {
             'circle-radius': [
               'interpolate',
               ['linear'],
               ['zoom'],
-              13, 2,
+              14, 1,
               // @ts-ignore
-              14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
+              15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
               // @ts-ignore
-              15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
+              16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
               // @ts-ignore
-              16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
+              17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
               // @ts-ignore
-              17, ['number', ['get', 'radius'], 5],
+              18, ['number', ['get', 'D_COUR_M'], 5],
               // @ts-ignore
-              18, ['*', 2, ['number', ['get', 'radius'], 5]],
-              // @ts-ignore
-              19, ['*', 4, ['number', ['get', 'radius'], 5]]
+              19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
             ],
-            'circle-color': ['string', ['get', 'color'], '#000000'],
-            'circle-opacity': 0.7
+            'circle-color': '#aaaaaa',
+            'circle-opacity': 0.3,
+            'circle-stroke-color': '#888888',
+            'circle-stroke-width': 1,
+            'circle-stroke-opacity': 0.3
           },
           layout: { visibility: 'none' }
         })
@@ -122,19 +173,19 @@ watch(species, () => {
           const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
           const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
           species.value.forEach((item) => {
-            const id = item.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
-            const genre = item.GENRE_lat.toLowerCase().replace(' ', '_')
             speciesItem.children.push({
-              id: id,
-              ids: [id],
+              id: item.id,
+              ids: [item.id],
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_eng,
               label_fr: item.NOM_COMPLET_fr,
-              legendScaleId: 'voc-scale',
-              genre: genre,
-              selected: id === mostFrequentSpecies // most common, default one
+              legendImage: `${CDN_DATA_URL}/specie_${item.id}_graph.png`,
+              measures: item.measures,
+              genre: item.genus,
+              selected: item.id === mostFrequentSpecies // most common, default one
             })
-            data.popupLayerIds?.push(id)
+            data.popupLayerIds?.push(item.id)
+            item.measures.forEach((measure) => data.popupLayerIds?.push(`${item.id}_${measure}`))
           })
           parameters.value = data
           triggerRef(parameters)
@@ -150,7 +201,7 @@ watch(species, () => {
 })
 
 const singleItems = computed<SelectableSingleItem[]>(() =>
-  (parameters.value.selectableItems ?? []).flatMap((item: SelectableItem) =>
+  (parameters.value?.selectableItems ?? []).flatMap((item: SelectableItem) =>
     'children' in item ? item.children : [item]
   )
 )
@@ -169,19 +220,26 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
   return ids
 })
 
-function getParent(id: string): SelectableItem | undefined {
-  return (parameters.value.selectableItems ?? [])
-    .find((item: SelectableItem) => (item as SelectableGroupItem).children 
-      && (item as SelectableGroupItem).children.find((child: SelectableSingleItem) => child.id == id) !== undefined)
-}
+const scale = computed<string | undefined>(() => {
+  const scaleIds: string[] | undefined = parameters.value?.legendScales.map((scl) => scl.id)
+  return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds?.includes(scl)).pop()
+})
 
-function getParentLabel(id: string) {
-  const parent = getParent(id)
-  return parent?.label
+function onOpenLegendDialog(item: SelectableSingleItem) {
+  legendDialogTitle.value = `${item.label} (${item.label_en})`
+  legendDialogImageSrc.value = item.legendImage
+  legendDialog.value = true
 }
 
 function getLegendTitle(id: string): string | undefined {
-  return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.title
+  const scale = parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)
+  if (scale) { 
+    if (scale.unit) {
+      return `${scale.title} (${scale.unit})`
+    }
+    return scale.title
+  }
+  return undefined
 }
 
 function getLegendScale(id: string): ScaleEntry[] | undefined {
@@ -235,8 +293,9 @@ function showDocumentation(id: string) {
       <v-list-item v-show="!drawerRail">
         <LayerSelector
           v-model="selectedLayerIds"
-          :items="parameters.selectableItems"
+          :items="parameters?.selectableItems"
           :species="species"
+          :scales="parameters?.legendScales"
         />
       </v-list-item>
       <v-list-item v-if="legendItems.length" :prepend-icon="mdiMapLegend">
@@ -249,22 +308,24 @@ function showDocumentation(id: string) {
           <v-card-text class="pa-0">
             <v-row>
               <v-col v-for="(item, index) in legendItems" :key="index" cols="12">
-                <div class="mb-2 text-overline">{{ getParentLabel(item.id) }} - {{ item.label }}</div>
-                <div class="mb-1">
-                  <v-chip>en</v-chip>
-                  <span class="pl-2">{{ item.label_en }}</span>
-                </div>
-                <div class="mb-2">
-                  <v-chip>fr</v-chip>
-                  <span class="pl-2">{{ item.label_fr }}</span>
-                </div>
+                <div class="mb-2 text-overline">{{ item.label }} ({{ item.label_en }})</div>
                 <div v-if="item.legend" class="mb-3 text-caption">{{ item.legend }}</div>
-                <div v-if="item.legendScaleId" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(item.legendScaleId) }}</div>
-                <v-img v-if="item.legendImage" :src="item.legendImage" />
-                <v-table v-if="item.legendScaleId" density="compact">
+                
+                <div v-if="item.legendImage" class="mb-3">
+                  <v-btn
+                    :icon="mdiOpenInNew"
+                    size="xsmall"
+                    flat
+                    @click="onOpenLegendDialog(item)"
+                  >
+                  </v-btn>
+                  <v-img :src="item.legendImage" @click="onOpenLegendDialog(item)"/>
+                </div>
+                <div v-if="scale" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(scale) }}</div>
+                <v-table v-if="scale" density="compact">
                   <tbody>
                     <tr
-                      v-for="entry in getLegendScale(item.legendScaleId)"
+                      v-for="entry in getLegendScale(scale)"
                       :key="entry.color"
                     >
                       <td :style="`background-color: ${entry.color}`"></td>
@@ -282,14 +343,14 @@ function showDocumentation(id: string) {
           </v-card-text>
         </v-card>
       </v-list-item>
-      <v-list-item :prepend-icon="mdiBookOpenPageVariant">
+      <v-list-item v-if="documentationIds.length>0" :prepend-icon="mdiBookOpenPageVariant">
         <v-list-item-title>
           <span class="text-h6">Documentation</span>
         </v-list-item-title>
       </v-list-item>
-      <v-list-item v-if="!drawerRail">
-        <div>
-          <v-btn variant="text" class="text-none" @click="showDocumentation('trees')">Trees</v-btn>
+      <v-list-item v-if="documentationIds.length>0 && !drawerRail">
+        <div v-for="doc of documentationIds" :key="doc">
+          <v-btn variant="text" class="text-none" @click="showDocumentation(doc)">{{ doc }}</v-btn>
         </div>
       </v-list-item>
     </v-list>
@@ -314,16 +375,39 @@ function showDocumentation(id: string) {
       <v-col cols="12" class="py-0">
         <MapLibreMap
           ref="map"
-          :center="parameters.center"
+          :center="parameters?.center"
           :style-spec="style"
           :selectable-layer-ids="selectableLayerIds"
           :selected-layer-ids="extendedSelectedLayerIds"
-          :popup-layer-ids="parameters.popupLayerIds"
-          :zoom="parameters.zoom"
-          :scales="parameters.legendScales"
+          :popup-layer-ids="parameters?.popupLayerIds"
+          :zoom="parameters?.zoom"
         />
       </v-col>
     </v-row>
+
+    <v-dialog
+      v-model="legendDialog"
+      fullscreen
+    >
+      <v-card>
+        <v-toolbar
+          color="grey-lighten-4"
+        >
+          <v-btn
+            :icon="mdiClose"
+            @click="legendDialog = false"
+          >
+          </v-btn>
+          <v-toolbar-title>
+            {{ legendDialogTitle }}
+          </v-toolbar-title>
+        </v-toolbar>
+        <v-card-text>
+          <v-img :src="legendDialogImageSrc"/>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
