@@ -7,12 +7,13 @@ const props = withDefaults(
   defineProps<{
     modelValue?: string[]
     items?: SelectableItem[],
-    species: SpeciesItem[],
-    scales: LegendScale[]
+    scales?: LegendScale[],
+    species: SpeciesItem[]
   }>(),
   {
     modelValue: () => [],
-    items: () => []
+    items: () => [],
+    scales: () => []
   }
 )
 const emit = defineEmits<{
@@ -44,7 +45,7 @@ const selectedTab = computed<SelectableSingleItem | undefined>(() =>
 const tabItems = computed(() => selectableTabs.value.map((item) => {
   return {
     id: item.id,
-    label: `${item.label} (${item.label_en})`
+    label: `${item.label} (${(item as SelectableSingleItem).label_en})`
   }
 }))
 
@@ -99,7 +100,7 @@ watch(() => props.items,
 
 watch(() => props.scales,
   (value: LegendScale[]) => {
-    if (value) {
+    if (value && value.length>0) {
       scale.value = value[0].id
     }
     updateLayers()

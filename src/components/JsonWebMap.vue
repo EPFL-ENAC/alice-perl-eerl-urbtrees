@@ -26,7 +26,7 @@ const CDN_DATA_URL = `${props.cdnUrl}/data`
 const map = ref<InstanceType<typeof MapLibreMap>>()
 const selectedLayerIds = ref<string[]>([])
 const style = shallowRef<StyleSpecification>()
-const parameters = shallowRef<Parameters>({})
+const parameters = shallowRef<Parameters>()
 const legendDialog = ref(false)
 const legendDialogTitle = ref<string>()
 const legendDialogImageSrc = ref<string>()
@@ -201,7 +201,7 @@ watch(species, () => {
 })
 
 const singleItems = computed<SelectableSingleItem[]>(() =>
-  (parameters.value.selectableItems ?? []).flatMap((item: SelectableItem) =>
+  (parameters.value?.selectableItems ?? []).flatMap((item: SelectableItem) =>
     'children' in item ? item.children : [item]
   )
 )
@@ -221,25 +221,14 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
 })
 
 const scale = computed<string | undefined>(() => {
-  const scaleIds: string[] = parameters.value.legendScales.map((scl) => scl.id)
-  return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds.includes(scl)).pop()
+  const scaleIds: string[] | undefined = parameters.value?.legendScales.map((scl) => scl.id)
+  return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds?.includes(scl)).pop()
 })
 
 function onOpenLegendDialog(item: SelectableSingleItem) {
   legendDialogTitle.value = item.label
   legendDialogImageSrc.value = item.legendImage
   legendDialog.value = true
-}
-
-function getParent(id: string): SelectableItem | undefined {
-  return (parameters.value.selectableItems ?? [])
-    .find((item: SelectableItem) => (item as SelectableGroupItem).children 
-      && (item as SelectableGroupItem).children.find((child: SelectableSingleItem) => child.id == id) !== undefined)
-}
-
-function getParentLabel(id: string) {
-  const parent = getParent(id)
-  return parent?.label
 }
 
 function getLegendTitle(id: string): string | undefined {
@@ -304,9 +293,9 @@ function showDocumentation(id: string) {
       <v-list-item v-show="!drawerRail">
         <LayerSelector
           v-model="selectedLayerIds"
-          :items="parameters.selectableItems"
+          :items="parameters?.selectableItems"
           :species="species"
-          :scales="parameters.legendScales"
+          :scales="parameters?.legendScales"
         />
       </v-list-item>
       <v-list-item v-if="legendItems.length" :prepend-icon="mdiMapLegend">
@@ -386,12 +375,12 @@ function showDocumentation(id: string) {
       <v-col cols="12" class="py-0">
         <MapLibreMap
           ref="map"
-          :center="parameters.center"
+          :center="parameters?.center"
           :style-spec="style"
           :selectable-layer-ids="selectableLayerIds"
           :selected-layer-ids="extendedSelectedLayerIds"
-          :popup-layer-ids="parameters.popupLayerIds"
-          :zoom="parameters.zoom"
+          :popup-layer-ids="parameters?.popupLayerIds"
+          :zoom="parameters?.zoom"
         />
       </v-col>
     </v-row>
