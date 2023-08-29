@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import 'maplibre-gl/dist/maplibre-gl.css'
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css'
-import '@/assets/theme-control.css'
+import 'maplibregl-theme-switcher/styles.css'
 
 import { geocoderApi } from '@/utils/geocoder'
-import { DivControl, ThemeControl } from '@/utils/control'
-import type { ThemeDefinition } from '@/utils/control'
+import { DivControl } from '@/utils/control'
+import { ThemeSwitcherControl } from 'maplibregl-theme-switcher'
+import type { ThemeDefinition } from 'maplibregl-theme-switcher'
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder'
 import {
   AttributionControl,
@@ -123,7 +124,7 @@ watch(
         }
       })
       const selectedTheme = themes.find((item) => item.selected)?.id
-      map?.addControl(new ThemeControl(themeDefs, selectedTheme))
+      map?.addControl(new ThemeSwitcherControl(themeDefs, selectedTheme))
     }
   },
   { immediate: true }
