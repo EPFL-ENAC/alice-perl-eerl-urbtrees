@@ -22,6 +22,7 @@
     "dompurify": "^3.0.4",
     "events": "^3.3.0",
     "maplibre-gl": "^2.4.0",
+    "maplibregl-theme-switcher": "github:EPFL-ENAC/maplibregl-theme-switcher#1.0.0",
     "marked": "^5.1.0",
     "papaparse": "^5.4.1",
     "pinia": "^2.0.32",
