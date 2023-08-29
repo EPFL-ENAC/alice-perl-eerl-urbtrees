@@ -124,7 +124,14 @@ watch(species, () => {
                 19, ['*', 4, ['number', ['get', 'radius'], 5]]
               ],
               'circle-color': ['string', ['get', `color_${measure}`], '#000000'],
-              'circle-opacity': 0.7
+              'circle-opacity': [
+                'case',
+                ['==', '#000000', ['get', `color_${measure}`]], 0,
+                0.7
+              ],
+              'circle-stroke-color': '#888888',
+              'circle-stroke-width': 1,
+              'circle-stroke-opacity': 0.3
             },
             layout: { visibility: 'none' }
           })

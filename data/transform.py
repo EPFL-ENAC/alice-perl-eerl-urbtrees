@@ -177,6 +177,23 @@ colors = {
         }
     ]
 }
+fieldNames = [
+    "GENRE_lat", "GENRE_fr", "GENRE_eng", 
+    "NOM_COMPLET_lat", "NOM_COMPLET_fr", "NOM_COMPLET_eng", 
+    "COMMUNE", "L_area", "leaf", "D_COUR_M",
+    "O3_rm_gy", "VOC_g_y", "OFP_kg_y", "PM10_rm_gy",
+    "radius", "color_voc", "color_o3", "color_ofp", "color_pm10"
+    ]
+
+def getColor(measure, value):
+    """
+    Get the color from the measure's categorical color scheme.
+    """
+    color = "#000000"
+    if value != None:
+        scheme = [d for d in colors[measure] if d["range"][0] <= value and value < d["range"][1]]
+        color = scheme[0]["color"]
+    return color
 
 def transform(filePath):
     fileName = os.path.basename(filePath)
@@ -221,9 +238,12 @@ def transform(filePath):
     # add fields
     inLayerDefn = inLayer.GetLayerDefn()
 
+    
     for i in range(0, inLayerDefn.GetFieldCount()):
         fieldDefn = inLayerDefn.GetFieldDefn(i)
-        outLayer.CreateField(fieldDefn)
+        fieldName = fieldDefn.GetNameRef()
+        if fieldName in fieldNames:
+            outLayer.CreateField(fieldDefn)
 
     # new field
     radiusField = ogr.FieldDefn("radius", ogr.OFTReal)
@@ -252,7 +272,8 @@ def transform(filePath):
         outFeature = ogr.Feature(outLayerDefn)
         # set the geometry
         outFeature.SetGeometry(geom)
-        # calculate radius from the L_area
+        
+        # calculate radius from the L_area and colors from the measures' color scheme
         radius = None
         color = {
             "voc": "#000000",
@@ -263,32 +284,17 @@ def transform(filePath):
         for i in range(0, outLayerDefn.GetFieldCount()):
             fieldName = outLayerDefn.GetFieldDefn(i).GetNameRef()
             if fieldName == "L_area":
-                fieldValue = inFeature.GetField(i)
+                fieldValue = inFeature.GetField(inFeature.GetFieldIndex(fieldName))
                 radius = math.sqrt(fieldValue/3.14159)
             elif fieldName == "VOC_g_y":
-                fieldValue = inFeature.GetField(i)
-                if fieldValue == None:
-                    fieldValue = 0
-                scheme = [d for d in colors["voc"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
-                color["voc"] = scheme[0]["color"]
+                color["voc"] = getColor("voc", inFeature.GetField(inFeature.GetFieldIndex(fieldName)))
             elif fieldName == "O3_rm_gy":
-                fieldValue = inFeature.GetField(i)
-                if fieldValue == None:
-                    fieldValue = 0
-                scheme = [d for d in colors["o3"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
-                color["o3"] = scheme[0]["color"]
+                color["o3"] = getColor("o3", inFeature.GetField(inFeature.GetFieldIndex(fieldName)))
             elif fieldName == "OFP_kg_y":
-                fieldValue = inFeature.GetField(i)
-                if fieldValue == None:
-                    fieldValue = 0
-                scheme = [d for d in colors["ofp"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
-                color["ofp"] = scheme[0]["color"]
+                color["ofp"] = getColor("ofp", inFeature.GetField(inFeature.GetFieldIndex(fieldName)))
             elif fieldName == "PM10_rm_gy":
-                fieldValue = inFeature.GetField(i)
-                if fieldValue == None:
-                    fieldValue = 0
-                scheme = [d for d in colors["pm10"] if d["range"][0] <= fieldValue and fieldValue < d["range"][1]]
-                color["pm10"] = scheme[0]["color"]
+                color["pm10"] = getColor("pm10", inFeature.GetField(inFeature.GetFieldIndex(fieldName)))
+        
         # set the attributes
         for i in range(0, outLayerDefn.GetFieldCount()):
             fieldName = outLayerDefn.GetFieldDefn(i).GetNameRef()
@@ -304,8 +310,9 @@ def transform(filePath):
             elif fieldName == "color_pm10":
                 fieldValue = color["pm10"]
             else:
-                fieldValue = inFeature.GetField(i)
+                fieldValue = inFeature.GetField(inFeature.GetFieldIndex(fieldName))
             outFeature.SetField(fieldName, fieldValue)
+        
         # add the feature to the shapefile
         outLayer.CreateFeature(outFeature)
         # destroy the features and get the next input feature

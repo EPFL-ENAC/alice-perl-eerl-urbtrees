@@ -138,20 +138,20 @@ watch(
                   <td>${fprops.L_area}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">O<sub>3</sub> g/year</td>
-                  <td>${fprops.O3_rm_gy}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">VOC g/year</td>
+                  <td>${fprops.VOC_g_y ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">VOC g/year</td>
-                  <td>${fprops.VOC_g_y}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">O<sub>3</sub> g/year</td>
+                  <td>${fprops.O3_rm_gy ?? "-"}</td>
                 </tr>
                 <tr>
                   <td class="text-caption font-weight-bold text-left pr-1">OFP kg/year</td>
-                  <td>${fprops.OFP_kg_y}</td>
+                  <td>${fprops.OFP_kg_y ?? "-"}</td>
                 </tr>
                 <tr>
                   <td class="text-caption font-weight-bold text-left pr-1">PM10 g/year</td>
-                  <td>${fprops.PM10_rm_gy}</td>
+                  <td>${fprops.PM10_rm_gy ?? "-"}</td>
                 </tr>
                 </tbody>
               </table>`
