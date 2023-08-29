@@ -3,7 +3,7 @@ import axios from 'axios'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useDisplay } from 'vuetify'
-import { defineProps, onMounted, ref, withDefaults } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -48,9 +48,6 @@ function close() {
 
 <template>
   <v-dialog v-model="dialog" :width="width" :fullscreen="mobile">
-    <template #activator="{ on, attrs }">
-      <slot name="activator" :on="on" :attrs="attrs" />
-    </template>
     <v-card class="text-justify">
       <v-card-title v-if="name">{{ name }}</v-card-title>
       <v-card-text>
@@ -58,7 +55,7 @@ function close() {
         <div v-html="contentHtml" class="marked"></div>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn v-if="buttonText" text @click="close">
+        <v-btn v-if="buttonText" @click="close">
           {{ buttonText }}
         </v-btn>
         <v-btn v-else icon @click="close()">
