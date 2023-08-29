@@ -189,11 +189,11 @@ def getColor(measure, value):
     """
     Get the color from the measure's categorical color scheme.
     """
-    if value == None:
-        return "#000000"
-    else:
+    color = "#000000"
+    if value != None:
         scheme = [d for d in colors[measure] if d["range"][0] <= value and value < d["range"][1]]
-        return scheme[0]["color"]
+        color = scheme[0]["color"]
+    return color
 
 def transform(filePath):
     fileName = os.path.basename(filePath)
