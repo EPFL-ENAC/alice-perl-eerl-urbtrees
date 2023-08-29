@@ -4,7 +4,8 @@ import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css'
 import '@/assets/theme-control.css'
 
 import { geocoderApi } from '@/utils/geocoder'
-import { DivControl, ThemeControl, ThemeDefinition } from '@/utils/control'
+import { DivControl, ThemeControl } from '@/utils/control'
+import type { ThemeDefinition } from '@/utils/control'
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder'
 import {
   AttributionControl,
