@@ -20,12 +20,6 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
 }>()
 
-const themeIdx = ref<number>()
-const themeItems = computed<any[]>(() =>
-  props.items?.filter((item: any) => item.id === 'theme')
-    .flatMap((item: any) => item.children)
-)
-
 const genre = ref<string>()
 const genreItems = computed<any[]>(() =>
   props.species
@@ -73,21 +67,13 @@ watch(tab, () => {
   updateLayers()
 })
 
-watch([themeIdx, scale], () => {
+watch(scale, () => {
   updateLayers()
 })
 
 watch(() => props.items,
   (value: SelectableItem[]) => {
-    // init with default selected theme
-    const themeGroup = value.find((item: SelectableItem) => item.id === 'theme') as SelectableGroupItem
-    if (themeGroup) {
-      themeGroup.children.forEach((item: SelectableSingleItem, index: number) => {
-      if (item.selected)
-        themeIdx.value = index
-      })
-    }
-    // default values, while there are only the quercus_robur data
+    // init with declared species
     const speciesGroup = value.find((item: SelectableItem) => item.id === 'species') as SelectableGroupItem
     if (speciesGroup) {
       // find the genre of the default species
@@ -111,9 +97,6 @@ watch(() => props.scales,
 
 function updateLayers() {
   const sels = []
-  if (themeIdx.value !== undefined) {
-    sels.push(themeItems.value[themeIdx.value].id)
-  }
   if (tab.value) { 
     const map = selectableTabs.value.filter((item: SelectableItem) => item.id === tab.value).pop()
     if (map) {
@@ -131,18 +114,7 @@ function updateLayers() {
 <template>
   <v-card flat>
     <v-card-text class="pa-0">
-      <div>
-        <div class="mb-2 text-overline">Theme</div>
-        <v-btn-toggle
-          v-model="themeIdx"
-          divided
-          variant="outlined"
-        >
-          <v-btn v-for="(item, index) in themeItems" :key="index" size="x-small">{{ item.label }}</v-btn>
-        </v-btn-toggle>
-      </div>
       <div class="mt-2">
-        <div class="mb-2 text-overline">Trees</div>
         <v-select
           v-model="genre"
           label="Genus"

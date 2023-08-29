@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import 'maplibre-gl/dist/maplibre-gl.css'
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css'
+import '@/assets/theme-control.css'
 
 import { geocoderApi } from '@/utils/geocoder'
-import { DivControl } from '@/utils/control'
-import type { LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
+import { DivControl, ThemeControl, ThemeDefinition } from '@/utils/control'
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder'
 import {
   AttributionControl,
@@ -20,7 +20,7 @@ import {
   type StyleSpecification
 } from 'maplibre-gl'
 import { onMounted, ref, watch } from 'vue'
-import type { SpeciesProps } from '@/utils/layerSelector'
+import type { SelectableSingleItem, SpeciesProps } from '@/utils/layerSelector'
 
 defineExpose({
   update
@@ -33,6 +33,7 @@ const props = withDefaults(
     aspectRatio?: number
     minZoom?: number
     maxZoom?: number
+    themes: SelectableSingleItem[]
     selectableLayerIds?: string[]
     selectedLayerIds?: string[]
     popupLayerIds?: string[]
@@ -108,6 +109,26 @@ watch(
   },
   { immediate: true }
 )
+
+watch(
+  () => props.themes,
+  (themes) => {
+    if (themes) {
+      const themeDefs: ThemeDefinition[] = themes.map((item: SelectableSingleItem) => {
+        return {
+          id: item.id,
+          label: item.label,
+          selected: item.selected
+        }
+      })
+      const selectedTheme = themes.find((item) => item.selected)?.id
+      map?.addControl(new ThemeControl(themeDefs, selectedTheme))
+    }
+  },
+  { immediate: true }
+)
+
+
 watch(
   () => props.popupLayerIds,
   (popupLayerIds) => {
@@ -186,6 +207,7 @@ function filterLayers() {
     map
       .getStyle()
       .layers
+      .filter((layer) => !props.themes.map((theme) => theme.id).includes(layer.id))
       .forEach((layer) => {
         map?.setLayoutProperty(
           layer.id,
