@@ -221,11 +221,13 @@ const themeItems = computed<SelectableSingleItem[]>(() => {
 })
 
 const selectableLayerIds = computed<string[]>(() => singleItems.value.map((item) => item.id))
-const legendItems = computed(() =>
+const selectedItemWithLegend = computed(() =>
   singleItems.value
     .filter((item: SelectableSingleItem) => selectedLayerIds.value.some((id: string) => item.id === id))
     .filter((item: SelectableSingleItem) => item.legend !== undefined || item.legendImage !== undefined || item.legendScaleId !== undefined)
+    .pop()
 )
+const selectedSpecie = computed(() => getSpecie(selectedItemWithLegend.value))
 
 const extendedSelectedLayerIds = computed<string[]>(() => {
   const addtionalIds: string[] = singleItems.value
@@ -240,16 +242,20 @@ const scale = computed<string | undefined>(() => {
   return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds?.includes(scl)).pop()
 })
 
+function getSpecie(sel: SelectableSingleItem | undefined) {
+  return sel ? species.value.filter((item) => item.id === sel.id).pop() : undefined
+}
+
 function onOpenLegendDialog(item: SelectableSingleItem) {
   legendDialogTitle.value = `${item.label} (${item.label_en})`
   legendDialogImageSrc.value = item.legendImage
   legendDialog.value = true
 }
 
-function getLegendTitle(id: string): string | undefined {
+function getLegendTitle(id: string, withUnit: boolean): string | undefined {
   const scale = parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)
   if (scale) { 
-    if (scale.unit) {
+    if (withUnit && scale.unit) {
       return `${scale.title} (${scale.unit})`
     }
     return scale.title
@@ -272,7 +278,7 @@ function getLegendScaleEntryCaption(entry: ScaleEntry): string {
   if (entry.min !== undefined && entry.max === undefined)
     rval = `> ${entry.min}`
   if (entry.unit)
-    rval = `${rval} (${entry.unit })`
+    rval = `${rval} ${entry.unit }`
   return rval
 }
 
@@ -290,10 +296,40 @@ function showDocumentation(id: string) {
   }
 }
 
+function getGenusTreeCountLabel(sel: SpeciesItem) {
+  return new Intl.NumberFormat().format(sel['GENUS TREE COUNT'])
+}
+
+function getGenusShareLabel(sel: SpeciesItem) {
+  return new Intl.NumberFormat().format(Number.parseFloat(sel['GENUS SHARE'].replace('%', ''))) + '%'
+}
+
+function getSpecieTreeCountLabel(sel: SpeciesItem) {
+  return new Intl.NumberFormat().format(sel['SPECIE TREE COUNT'])
+}
+
+function getSpecieShareLabel(sel: SpeciesItem) {
+  return new Intl.NumberFormat().format(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
+}
+
+function getSpecieMeasureMeanLabel(sel: SpeciesItem, measure: string) {
+  const field = `mean_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
+  const val = new Intl.NumberFormat().format((sel as any)[field])
+  const sign = ['o3', 'pm10'].includes(measure) ? '-' : '+'
+  return `${sign}${val}`
+}
+
+function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
+  const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
+  const val = new Intl.NumberFormat().format((sel as any)[field])
+  const sign = ['o3', 'pm10'].includes(measure) ? '-' : '+'
+  return `${sign}${val}`
+}
+
 </script>
 
 <template>
-  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 200 : 350" @click="drawerRail = false">
+  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 200 : 400" @click="drawerRail = false">
     <v-list density="compact" nav>
       <v-list-item :prepend-icon="drawerRail ? mdiChevronRight : undefined">
         <template #append>
@@ -313,30 +349,91 @@ function showDocumentation(id: string) {
           :scales="parameters?.legendScales"
         />
       </v-list-item>
-      <v-list-item v-if="legendItems.length" :prepend-icon="mdiMapLegend">
+      <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
         <v-list-item-title>
-          <span class="text-h6">Legend</span>
+          <span class="text-h6">Legends</span>
         </v-list-item-title>
       </v-list-item>
-      <v-list-item v-if="!drawerRail && legendItems.length">
+      <v-list-item v-if="!drawerRail && selectedItemWithLegend && selectedSpecie">
         <v-card>
           <v-card-text class="pa-0">
             <v-row>
-              <v-col v-for="(item, index) in legendItems" :key="index" cols="12">
-                <div class="mb-2 text-overline">{{ item.label }} ({{ item.label_en }})</div>
-                <div v-if="item.legend" class="mb-3 text-caption">{{ item.legend }}</div>
+              <v-col cols="12">
+                <div class="mb-2 text-overline">{{ selectedSpecie.GENRE_lat }} ({{ selectedSpecie.GENRE_eng }})</div>
+                <v-row class="mb-1">
+                  <v-col cols="6">
+                    <v-chip size="x-large">
+                      {{ getGenusTreeCountLabel(selectedSpecie) }} trees
+                    </v-chip>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-chip size="x-large">
+                      {{ getGenusShareLabel(selectedSpecie) }}
+                    </v-chip>
+                  </v-col>
+                </v-row>
+                <div class="mb-5 text-caption text-grey-darken-1">Share of genus within Geneva tree inventory (ICA)</div>
+
+                <div class="mb-2 text-overline">{{ selectedItemWithLegend.label }} ({{ selectedItemWithLegend.label_en }})</div>
+                <v-row class="mb-1">
+                  <v-col cols="6">
+                    <v-chip size="x-large">
+                      {{ getSpecieTreeCountLabel(selectedSpecie) }} trees
+                    </v-chip>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-chip size="x-large">
+                      {{ getSpecieShareLabel(selectedSpecie) }}
+                    </v-chip>
+                  </v-col>
+                </v-row>
+                <div class="mb-3 text-caption text-grey-darken-1">Share of specie within Geneva tree inventory (ICA)</div>
                 
-                <div v-if="item.legendImage" class="mb-3">
-                  <v-btn
-                    :icon="mdiOpenInNew"
-                    size="xsmall"
-                    flat
-                    @click="onOpenLegendDialog(item)"
-                  >
-                  </v-btn>
-                  <v-img :src="item.legendImage" @click="onOpenLegendDialog(item)"/>
+                <v-table v-if="scale" density="compact" class="mb-5">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Mean</th>
+                      <th>Sum</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template v-for="measure in selectedSpecie.measures" :key="measure">
+                      <tr>
+                        <td class="text-caption">{{ getLegendTitle(measure, false) }}</td>
+                        <td class="text-no-wrap">{{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg</td>
+                        <td class="text-no-wrap">{{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg</td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </v-table>
+
+                <div v-if="selectedItemWithLegend.legend" class="mb-5 text-caption">{{ selectedItemWithLegend.legend }}</div>
+                <div v-if="selectedItemWithLegend.legendImage" class="mb-5">
+                  <v-hover v-slot="{ isHovering, props }">
+                    <v-card
+                      elevation="0"
+                      class="v-card-image"
+                      :class="{ 'on-hover': isHovering }"
+                      v-bind="props"
+                    >
+                    <v-img :src="selectedItemWithLegend.legendImage" @click="onOpenLegendDialog(selectedItemWithLegend)">
+                      <v-card-title class="d-flex justify-center align-self-auto" primary-title>
+                          <v-btn
+                            color="primary"
+                            class="mt-4"
+                            :prepend-icon="mdiOpenInNew"
+                            style="z-index: 9999"
+                            @click.stop="onOpenLegendDialog(selectedItemWithLegend)">
+                            Open
+                          </v-btn>
+                      </v-card-title>
+                    </v-img>
+                    </v-card>
+                  </v-hover>
                 </div>
-                <div v-if="scale" class="mb-3 text-caption font-weight-bold">{{ getLegendTitle(scale) }}</div>
+
+                <div v-if="scale" class="mb-3 text-overline">{{ getLegendTitle(scale, true) }}</div>
                 <v-table v-if="scale" density="compact">
                   <tbody>
                     <tr
@@ -430,5 +527,8 @@ function showDocumentation(id: string) {
 <style lang="scss">
 .v-navigation-drawer {
   border-right: 1px solid rgb(var(--v-theme-primary)) !important;
+}
+.v-card-image:not(.on-hover) {
+  opacity: 0.6;
 }
 </style>
