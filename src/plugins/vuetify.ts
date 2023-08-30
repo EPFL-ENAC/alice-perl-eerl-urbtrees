@@ -3,7 +3,15 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 import colors from 'vuetify/lib/util/colors'
 import 'vuetify/styles'
 
+// Translations provided by Vuetify
+import { en, fr } from 'vuetify/locale'
+
 export default createVuetify({
+  locale: {
+    locale: 'en',
+    fallback: 'en',
+    messages: { en, fr },
+  },
   icons: {
     defaultSet: 'mdi',
     aliases,

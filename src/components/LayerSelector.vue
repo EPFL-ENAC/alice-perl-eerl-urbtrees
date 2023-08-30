@@ -2,6 +2,7 @@
 import type { LegendScale } from '@/utils/jsonWebMap'
 import type { SelectableItem, SelectableGroupItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import { watch, ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = withDefaults(
   defineProps<{
@@ -20,12 +21,15 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
 }>()
 
+const { t, locale } = useI18n({ useScope: 'global' })
+
 const genre = ref<string>()
-const genreItems = computed<any[]>(() =>
-  props.species
+const genreItems = computed<any[]>(() => {
+  const key = `GENRE_${locale.value === 'en' ? 'eng' : locale.value}`
+  return props.species
     .filter((value, index, array) => array.map((g) => g.GENRE_lat).indexOf(value.GENRE_lat) === index)
-    .map((g) => { return { id: g.GENRE_lat.toLowerCase().replace(' ', '_'), label: `${g.GENRE_lat} (${g.GENRE_eng})` }})
-)
+    .map((g) => { return { id: g.GENRE_lat.toLowerCase().replace(' ', '_'), label: `${g.GENRE_lat} (${(g as any)[key]})` }})
+})
 
 const tab = ref<string>()
 const selectableTabs = computed<SelectableItem[]>(() =>
@@ -37,14 +41,22 @@ const selectedTab = computed<SelectableSingleItem | undefined>(() =>
   selectableTabs.value.find((item) => item.id === tab.value) as SelectableSingleItem
 )
 const tabItems = computed(() => selectableTabs.value.map((item) => {
+  const label = (item as any)[`label_${locale.value}`]
   return {
     id: item.id,
-    label: `${item.label} (${(item as SelectableSingleItem).label_en})`
+    label: `${item.label} (${label})`
   }
 }))
 
 const scale = ref<string>()
-const scaleItems = computed<LegendScale[]>(() => props.scales?.filter((scl) => selectedTab.value && selectedTab.value.measures.includes(scl.id)))
+const scaleItems = computed<any[]>(() => props.scales?.
+  filter((scl) => selectedTab.value && selectedTab.value.measures.includes(scl.id))
+  .map((scl) => {
+    return {
+      id: scl.id,
+      title: t(scl.id)
+    }
+  }))
 
 watch(genre, () => {
   // select the default species or the first one
@@ -117,7 +129,7 @@ function updateLayers() {
       <div class="mt-2">
         <v-select
           v-model="genre"
-          label="Genus"
+          :label="$t('genus')"
           :items="genreItems"
           item-title="label"
           item-value="id"
@@ -126,7 +138,7 @@ function updateLayers() {
         ></v-select>
         <v-select
           v-model="tab"
-          label="Specie"
+          :label="$t('specie')"
           :items="tabItems"
           item-title="label"
           item-value="id"
@@ -135,7 +147,7 @@ function updateLayers() {
         ></v-select>
         <v-select
           v-model="scale"
-          label="Measure"
+          :label="$t('measure')"
           :items="scaleItems"
           item-title="title"
           item-value="id"

@@ -33,11 +33,13 @@ export interface SelectableGroupItem extends SelectableParentItem {
 export interface SpeciesItem {
   GENRE_lat: string
   GENRE_fr: string
+  GENRE_en: string
   GENRE_eng: string
   'GENUS TREE COUNT': number
   'GENUS SHARE': string
   NOM_COMPLET_lat: string
   NOM_COMPLET_fr: string
+  NOM_COMPLET_en: string
   NOM_COMPLET_eng: string
   'SPECIE TREE COUNT': number
   'SPECIE SHARE': string

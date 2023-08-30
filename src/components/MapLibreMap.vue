@@ -22,6 +22,7 @@ import {
   type StyleSpecification
 } from 'maplibre-gl'
 import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { SelectableSingleItem, SpeciesProps } from '@/utils/layerSelector'
 
 defineExpose({
@@ -54,6 +55,8 @@ const props = withDefaults(
   }
 )
 
+const { t, locale } = useI18n({ useScope: 'global' })
+
 const loading = ref(true)
 let map: Map | undefined = undefined
 
@@ -71,8 +74,8 @@ onMounted(() => {
   map.addControl(new ScaleControl({}))
   map.addControl(new FullscreenControl({}))
   map.addControl(new AttributionControl({
-      compact: true,
-      customAttribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>, <a href="https://www.epfl.ch/labs/perl/" target="_blank">PERL</a>, <a href="https://www.epfl.ch/labs/alice/" target="_blank">ALICE</a>, <a href="https://www.epfl.ch/labs/eerl/" target="_blank">EERL</a>'
+      compact: false,
+      customAttribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>, <a href="https://www.swisstopo.admin.ch/fr/geodata/images/ortho.html" target="_blank">SWISSIMAGE</a>, <a href="https://www.epfl.ch/labs/perl/" target="_blank">PERL</a>, <a href="https://www.epfl.ch/labs/alice/" target="_blank">ALICE</a>, <a href="https://www.epfl.ch/labs/eerl/" target="_blank">EERL</a>'
   }));
   map.addControl(
     new MaplibreGeocoder(geocoderApi, {
@@ -119,7 +122,7 @@ watch(
       const themeDefs: ThemeDefinition[] = themes.map((item: SelectableSingleItem) => {
         return {
           id: item.id,
-          label: item.label,
+          label: t(item.label),
           selected: item.selected
         }
       })
@@ -145,39 +148,44 @@ watch(
           const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
-            let html = `<p class="text-overline">${fprops.NOM_COMPLET_lat} (${fprops.NOM_COMPLET_eng})</p>
-              <table>
+            const label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
+            let html = `
+              <div class="marked">
+              <p class="text-overline">${fprops.NOM_COMPLET_lat} (${label})</p>
+              <table style="width: 100%">
                 <tbody>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">Municipality</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('municipality')}</td>
                   <td>${fprops.COMMUNE}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">Leaf type</td>
-                  <td>${fprops.leaf}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('leaf_type')}</td>
+                  <td>${t(fprops.leaf)}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">Leaf area</td>
-                  <td>${fprops.L_area}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('leaf_area')}</td>
+                  <td>${formatNumber(fprops.L_area)}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">VOC g/year</td>
-                  <td>${fprops.VOC_g_y ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('VOC g/year')}</td>
+                  <td>${formatNumber(fprops.VOC_g_y) ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">O<sub>3</sub> g/year</td>
-                  <td>${fprops.O3_rm_gy ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('O3 g/year')}</td>
+                  <td>${formatNumber(fprops.O3_rm_gy) ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">OFP kg/year</td>
-                  <td>${fprops.OFP_kg_y ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('OFP kg/year')}</td>
+                  <td>${formatNumber(fprops.OFP_kg_y) ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">PM10 g/year</td>
-                  <td>${fprops.PM10_rm_gy ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pr-1">${t('PM10 g/year')}</td>
+                  <td>${formatNumber(fprops.PM10_rm_gy) ?? "-"}</td>
                 </tr>
                 </tbody>
-              </table>`
+              </table>
+              </div>
+              `
             popup
               .setLngLat(e.lngLat)
               .setHTML(html)
@@ -219,6 +227,11 @@ function filterLayers() {
       })
   }
 }
+
+function formatNumber(nb: number) {
+  return nb === undefined ? undefined : new Intl.NumberFormat(`${locale.value}`).format(nb)
+}
+
 </script>
 
 <template>
