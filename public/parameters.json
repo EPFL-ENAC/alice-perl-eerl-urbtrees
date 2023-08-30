@@ -5,7 +5,7 @@
   "legendScales": [
     {
       "id": "voc",
-      "title": "Volatile Organic Compounds",
+      "title": "Volatile organic compounds",
       "unit": "g/year",
       "scale": [
         {
@@ -46,6 +46,53 @@
         },
         {
             "range": [0, 5.1],
+            "color": "#fde725"
+        }
+      ]
+    },
+    {
+      "id": "pm10",
+      "title": "PM10 particules deposition",
+      "unit": "g/year",
+      "scale": [
+        {
+          "range": [0, 23],
+          "color": "#440154"
+        },
+        {
+            "range": [23, 100],
+            "color": "#482878"
+        },
+        {
+            "range": [100, 180],
+            "color": "#3e4989"
+        },
+        {
+            "range": [180, 206],
+            "color": "#31688e"
+        },
+        {
+            "range": [206, 299],
+            "color": "#26828e"
+        },
+        {
+            "range": [299, 371],
+            "color": "#1f9e89"
+        },
+        {
+            "range": [371, 430],
+            "color": "#35b779"
+        },
+        {
+            "range": [430, 505],
+            "color": "#6ece58"
+        },
+        {
+            "range": [505, 628],
+            "color": "#b5de2b"
+        },
+        {
+            "range": [628, 8225],
             "color": "#fde725"
         }
       ]
@@ -140,53 +187,6 @@
         },
         {
             "range": [0, 0.021],
-            "color": "#fde725"
-        }
-      ]
-    },
-    {
-      "id": "pm10",
-      "title": "PM10 particules deposition",
-      "unit": "g/year",
-      "scale": [
-        {
-          "range": [0, 23],
-          "color": "#440154"
-        },
-        {
-            "range": [23, 100],
-            "color": "#482878"
-        },
-        {
-            "range": [100, 180],
-            "color": "#3e4989"
-        },
-        {
-            "range": [180, 206],
-            "color": "#31688e"
-        },
-        {
-            "range": [206, 299],
-            "color": "#26828e"
-        },
-        {
-            "range": [299, 371],
-            "color": "#1f9e89"
-        },
-        {
-            "range": [371, 430],
-            "color": "#35b779"
-        },
-        {
-            "range": [430, 505],
-            "color": "#6ece58"
-        },
-        {
-            "range": [505, 628],
-            "color": "#b5de2b"
-        },
-        {
-            "range": [628, 8225],
             "color": "#fde725"
         }
       ]
