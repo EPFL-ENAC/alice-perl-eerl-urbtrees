@@ -449,13 +449,13 @@ function getSpecieLabel(sel: SpeciesItem) {
                             :prepend-icon="mdiOpenInNew"
                             style="z-index: 9999"
                             @click.stop="onOpenLegendDialog(selectedItemWithLegend)">
-                            {{ $t('open') }}
+                            {{ $t('view') }}
                           </v-btn>
                       </v-card-title>
                     </v-img>
                     </v-card>
                   </v-hover>
-                  <div class="text-caption text-grey-darken-1">{{ $t('o3_balance') }}</div>
+                  <div class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</div>
                 </div>
 
                 <div v-if="scale" class="mb-3 text-overline">{{ getLegendTitle(scale, true) }}</div>
