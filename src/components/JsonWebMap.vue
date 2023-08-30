@@ -70,14 +70,14 @@ onMounted(() => {
               if (row.mean_BVOC_kg) {
                 row.measures.push('voc')
               }
+              if (row.mean_PM10_kg) {
+                row.measures.push('pm10')
+              }
               if (row.mean_O3_kg) {
                 row.measures.push('o3')
               }
               if (row.mean_OFP_kg) {
                 row.measures.push('ofp')
-              }
-              if (row.mean_PM10_kg) {
-                row.measures.push('pm10')
               }
               return row
             })
@@ -312,17 +312,21 @@ function getSpecieShareLabel(sel: SpeciesItem) {
   return new Intl.NumberFormat().format(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
 }
 
+function isMeasurePositive(measure: string) {
+  return ['voc', 'ofp'].includes(measure)
+}
+
 function getSpecieMeasureMeanLabel(sel: SpeciesItem, measure: string) {
   const field = `mean_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = new Intl.NumberFormat().format((sel as any)[field])
-  const sign = ['o3', 'pm10'].includes(measure) ? '-' : '+'
+  const sign = isMeasurePositive(measure) ? '+' : '-'
   return `${sign}${val}`
 }
 
 function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = new Intl.NumberFormat().format((sel as any)[field])
-  const sign = ['o3', 'pm10'].includes(measure) ? '-' : '+'
+  const sign = isMeasurePositive(measure) ? '+' : '-'
   return `${sign}${val}`
 }
 
@@ -401,8 +405,12 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     <template v-for="measure in selectedSpecie.measures" :key="measure">
                       <tr>
                         <td class="text-caption">{{ getLegendTitle(measure, false) }}</td>
-                        <td class="text-no-wrap">{{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg</td>
-                        <td class="text-no-wrap">{{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg</td>
+                        <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                          {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
+                        </td>
+                        <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                          {{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg
+                        </td>
                       </tr>
                     </template>
                   </tbody>
