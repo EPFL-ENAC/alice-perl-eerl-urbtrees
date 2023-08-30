@@ -11,6 +11,7 @@ import DOMPurify from 'dompurify'
 import { storeToRefs } from 'pinia'
 import { useDisplay } from 'vuetify'
 import { computed, onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { StyleSpecification } from 'maplibre-gl'
 // @ts-ignore
 import Papa from 'papaparse'
@@ -22,6 +23,8 @@ const props = defineProps<{
 }>()
 
 const CDN_DATA_URL = `${props.cdnUrl}/data`
+
+const { t, locale } = useI18n({ useScope: 'global' })
 
 const map = ref<InstanceType<typeof MapLibreMap>>()
 const selectedLayerIds = ref<string[]>([])
@@ -67,6 +70,9 @@ onMounted(() => {
               row.id = row.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
               row.genus = row.GENRE_lat.toLowerCase().replace(' ', '_')
               row.measures = []
+              // normalize locales
+              row.GENRE_en = row.GENRE_eng
+              row.NOM_COMPLET_en = row.NOM_COMPLET_eng
               if (row.mean_BVOC_kg) {
                 row.measures.push('voc')
               }
@@ -184,7 +190,7 @@ watch(species, () => {
               id: item.id,
               ids: [item.id],
               label: item.NOM_COMPLET_lat,
-              label_en: item.NOM_COMPLET_eng,
+              label_en: item.NOM_COMPLET_en,
               label_fr: item.NOM_COMPLET_fr,
               legendImage: `${CDN_DATA_URL}/specie_${item.id}_graph.png`,
               measures: item.measures,
@@ -247,7 +253,8 @@ function getSpecie(sel: SelectableSingleItem | undefined) {
 }
 
 function onOpenLegendDialog(item: SelectableSingleItem) {
-  legendDialogTitle.value = `${item.label} (${item.label_en})`
+  const label = (item as any)['label_' + locale.value]
+  legendDialogTitle.value = `${item.label} (${label})`
   legendDialogImageSrc.value = item.legendImage
   legendDialog.value = true
 }
@@ -256,9 +263,9 @@ function getLegendTitle(id: string, withUnit: boolean): string | undefined {
   const scale = parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)
   if (scale) { 
     if (withUnit && scale.unit) {
-      return `${scale.title} (${scale.unit})`
+      return `${t(scale.id)} (${t(scale.unit)})`
     }
-    return scale.title
+    return t(scale.id)
   }
   return undefined
 }
@@ -270,13 +277,7 @@ function getLegendScale(id: string): ScaleEntry[] | undefined {
 function getLegendScaleEntryCaption(entry: ScaleEntry): string {
   let rval = ''
   if (entry.range)
-    rval = `${entry.range[0]} - ${entry.range[1]}`
-  if (entry.min === undefined && entry.max !== undefined)
-    rval = `${entry.max} <=`
-  if (entry.min !== undefined && entry.max !== undefined)
-    rval = `${entry.min} - ${entry.max}`
-  if (entry.min !== undefined && entry.max === undefined)
-    rval = `> ${entry.min}`
+    rval = `${formatNumber(entry.range[0])} - ${formatNumber(entry.range[1])}`
   if (entry.unit)
     rval = `${rval} ${entry.unit }`
   return rval
@@ -296,20 +297,24 @@ function showDocumentation(id: string) {
   }
 }
 
+function formatNumber(nb: number) {
+  return new Intl.NumberFormat(`${locale.value}`).format(nb)
+}
+
 function getGenusTreeCountLabel(sel: SpeciesItem) {
-  return new Intl.NumberFormat().format(sel['GENUS TREE COUNT'])
+  return formatNumber(sel['GENUS TREE COUNT'])
 }
 
 function getGenusShareLabel(sel: SpeciesItem) {
-  return new Intl.NumberFormat().format(Number.parseFloat(sel['GENUS SHARE'].replace('%', ''))) + '%'
+  return formatNumber(Number.parseFloat(sel['GENUS SHARE'].replace('%', ''))) + '%'
 }
 
 function getSpecieTreeCountLabel(sel: SpeciesItem) {
-  return new Intl.NumberFormat().format(sel['SPECIE TREE COUNT'])
+  return formatNumber(sel['SPECIE TREE COUNT'])
 }
 
 function getSpecieShareLabel(sel: SpeciesItem) {
-  return new Intl.NumberFormat().format(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
+  return formatNumber(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
 }
 
 function isMeasurePositive(measure: string) {
@@ -318,16 +323,26 @@ function isMeasurePositive(measure: string) {
 
 function getSpecieMeasureMeanLabel(sel: SpeciesItem, measure: string) {
   const field = `mean_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
-  const val = new Intl.NumberFormat().format((sel as any)[field])
+  const val = formatNumber((sel as any)[field])
   const sign = isMeasurePositive(measure) ? '+' : '-'
   return `${sign}${val}`
 }
 
 function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
-  const val = new Intl.NumberFormat().format((sel as any)[field])
+  const val = formatNumber((sel as any)[field])
   const sign = isMeasurePositive(measure) ? '+' : '-'
   return `${sign}${val}`
+}
+
+function getSpecieGenusLabel(sel: SpeciesItem) {
+  const label = (sel as any)[`GENRE_${locale.value}`]
+  return `${sel.GENRE_lat} (${label})`
+}
+
+function getSpecieLabel(sel: SpeciesItem) {
+  const label = (sel as any)[`NOM_COMPLET_${locale.value}`]
+  return `${sel.NOM_COMPLET_lat} (${label})`
 }
 
 </script>
@@ -342,7 +357,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
       </v-list-item>
       <v-list-item :prepend-icon="mdiLayers">
         <v-list-item-title>
-          <span class="text-h6">Layers</span>
+          <span class="text-h6">{{ $t('layers') }}</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-show="!drawerRail">
@@ -355,7 +370,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
       </v-list-item>
       <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
         <v-list-item-title>
-          <span class="text-h6">Legends</span>
+          <span class="text-h6">{{ $t('legends') }}</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="!drawerRail && selectedItemWithLegend && selectedSpecie">
@@ -363,11 +378,11 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           <v-card-text class="pa-0">
             <v-row>
               <v-col cols="12">
-                <div class="mb-2 text-overline">{{ selectedSpecie.GENRE_lat }} ({{ selectedSpecie.GENRE_eng }})</div>
+                <div class="mb-2 text-overline">{{ getSpecieGenusLabel(selectedSpecie) }}</div>
                 <v-row class="mb-1">
                   <v-col cols="6">
                     <v-chip size="x-large">
-                      {{ getGenusTreeCountLabel(selectedSpecie) }} trees
+                      {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }}
                     </v-chip>
                   </v-col>
                   <v-col cols="6">
@@ -376,13 +391,13 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     </v-chip>
                   </v-col>
                 </v-row>
-                <div class="mb-5 text-caption text-grey-darken-1">Share of genus within Geneva tree inventory (ICA)</div>
+                <div class="mb-5 text-caption text-grey-darken-1">{{ $t('share_genus') }}</div>
 
-                <div class="mb-2 text-overline">{{ selectedItemWithLegend.label }} ({{ selectedItemWithLegend.label_en }})</div>
+                <div class="mb-2 text-overline">{{ getSpecieLabel(selectedSpecie) }}</div>
                 <v-row class="mb-1">
                   <v-col cols="6">
                     <v-chip size="x-large">
-                      {{ getSpecieTreeCountLabel(selectedSpecie) }} trees
+                      {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }}
                     </v-chip>
                   </v-col>
                   <v-col cols="6">
@@ -391,14 +406,14 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     </v-chip>
                   </v-col>
                 </v-row>
-                <div class="mb-3 text-caption text-grey-darken-1">Share of specie within Geneva tree inventory (ICA)</div>
+                <div class="mb-3 text-caption text-grey-darken-1">{{ $t('share_specie') }}</div>
                 
-                <v-table v-if="scale" density="compact" class="mb-5">
+                <v-table density="compact" class="mb-2">
                   <thead>
                     <tr>
                       <th></th>
-                      <th>Mean</th>
-                      <th>Sum</th>
+                      <th>{{ $t('mean') }}</th>
+                      <th>{{ $t('sum') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -415,13 +430,14 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     </template>
                   </tbody>
                 </v-table>
+                <div class="mb-5 text-caption text-grey-darken-1">{{ $t('annual_contrib') }}</div>
 
                 <div v-if="selectedItemWithLegend.legend" class="mb-5 text-caption">{{ selectedItemWithLegend.legend }}</div>
                 <div v-if="selectedItemWithLegend.legendImage" class="mb-5">
                   <v-hover v-slot="{ isHovering, props }">
                     <v-card
                       elevation="0"
-                      class="v-card-image"
+                      class="v-card-image mb-2"
                       :class="{ 'on-hover': isHovering }"
                       v-bind="props"
                     >
@@ -433,12 +449,13 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                             :prepend-icon="mdiOpenInNew"
                             style="z-index: 9999"
                             @click.stop="onOpenLegendDialog(selectedItemWithLegend)">
-                            Open
+                            {{ $t('view') }}
                           </v-btn>
                       </v-card-title>
                     </v-img>
                     </v-card>
                   </v-hover>
+                  <div class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</div>
                 </div>
 
                 <div v-if="scale" class="mb-3 text-overline">{{ getLegendTitle(scale, true) }}</div>
