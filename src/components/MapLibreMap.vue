@@ -81,6 +81,7 @@ onMounted(() => {
     new MaplibreGeocoder(geocoderApi, {
       maplibregl: { Marker },
       showResultsWhileTyping: true,
+      language: locale.value
     }),
     'top-left'
   )
