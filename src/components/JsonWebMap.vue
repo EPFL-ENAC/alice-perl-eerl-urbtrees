@@ -341,7 +341,7 @@ function getSpecieLabel(sel: SpeciesItem) {
 </script>
 
 <template>
-  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 200 : 400" @click="drawerRail = false">
+  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 300 : 400" @click="drawerRail = false">
     <v-list density="compact" nav>
       <v-list-item :prepend-icon="drawerRail ? mdiChevronRight : undefined">
         <template #append>
@@ -350,7 +350,7 @@ function getSpecieLabel(sel: SpeciesItem) {
       </v-list-item>
       <v-list-item :prepend-icon="mdiLayers">
         <v-list-item-title>
-          <span class="text-h6">{{ $t('layers') }}</span>
+          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('layers') }}</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-show="!drawerRail">
@@ -363,7 +363,7 @@ function getSpecieLabel(sel: SpeciesItem) {
       </v-list-item>
       <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
         <v-list-item-title>
-          <span class="text-h6">{{ $t('legends') }}</span>
+          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('legends') }}</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="!drawerRail && selectedItemWithLegend && selectedSpecie">
@@ -374,12 +374,12 @@ function getSpecieLabel(sel: SpeciesItem) {
                 <div class="mb-2 text-overline">{{ getSpecieGenusLabel(selectedSpecie) }}</div>
                 <v-row class="mb-1">
                   <v-col cols="6">
-                    <v-chip size="x-large">
+                    <v-chip :size="mobile ? 'small' : 'x-large'">
                       {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }}
                     </v-chip>
                   </v-col>
                   <v-col cols="6">
-                    <v-chip size="x-large">
+                    <v-chip :size="mobile ? 'small' : 'x-large'">
                       {{ getGenusShareLabel(selectedSpecie) }}
                     </v-chip>
                   </v-col>
@@ -389,40 +389,42 @@ function getSpecieLabel(sel: SpeciesItem) {
                 <div class="mb-2 text-overline">{{ getSpecieLabel(selectedSpecie) }}</div>
                 <v-row class="mb-1">
                   <v-col cols="6">
-                    <v-chip size="x-large">
+                    <v-chip :size="mobile ? 'small' : 'x-large'">
                       {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }}
                     </v-chip>
                   </v-col>
                   <v-col cols="6">
-                    <v-chip size="x-large">
+                    <v-chip :size="mobile ? 'small' : 'x-large'">
                       {{ getSpecieShareLabel(selectedSpecie) }}
                     </v-chip>
                   </v-col>
                 </v-row>
                 <div class="mb-3 text-caption text-grey-darken-1">{{ $t('share_specie') }}</div>
                 
-                <v-table density="compact" class="mb-2">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>{{ $t('mean') }}</th>
-                      <th>{{ $t('sum') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template v-for="measure in selectedSpecie.measures" :key="measure">
+                <v-responsive>
+                  <v-table density="compact" class="mb-2">
+                    <thead>
                       <tr>
-                        <td class="text-caption">{{ getLegendTitle(measure, false) }}</td>
-                        <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
-                          {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
-                        </td>
-                        <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
-                          {{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg
-                        </td>
+                        <th></th>
+                        <th>{{ $t('mean') }}</th>
+                        <th>{{ $t('sum') }}</th>
                       </tr>
-                    </template>
-                  </tbody>
-                </v-table>
+                    </thead>
+                    <tbody>
+                      <template v-for="measure in selectedSpecie.measures" :key="measure">
+                        <tr>
+                          <td class="text-caption">{{ getLegendTitle(measure, false) }}</td>
+                          <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                            {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
+                          </td>
+                          <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                            {{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </v-table>
+                </v-responsive>
                 <div class="mb-5 text-caption text-grey-darken-1">{{ $t('annual_contrib') }}</div>
 
                 <div v-if="selectedItemWithLegend.legend" class="mb-5 text-caption">{{ selectedItemWithLegend.legend }}</div>
@@ -475,7 +477,7 @@ function getSpecieLabel(sel: SpeciesItem) {
       </v-list-item>
       <v-list-item v-if="documentationIds.length>0" :prepend-icon="mdiBookOpenPageVariant">
         <v-list-item-title>
-          <span class="text-h6">Documentation</span>
+          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">Documentation</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="documentationIds.length>0 && !drawerRail">
