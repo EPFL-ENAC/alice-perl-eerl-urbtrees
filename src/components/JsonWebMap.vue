@@ -7,7 +7,6 @@ import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, Species
 import axios from 'axios'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { storeToRefs } from 'pinia'
 import { useDisplay } from 'vuetify'
 import { computed, onMounted, ref, shallowRef, triggerRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
