@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import LayerSelector from '@/components/LayerSelector.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
-import { useTitleStore } from '@/stores/title'
 import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
 import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew } from '@mdi/js'
 import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
@@ -39,7 +38,6 @@ const drawerHtml = ref('')
 const docId = ref<string>()
 const docHtml = ref<any>({})
 const { mobile } = useDisplay()
-const { title, subtitle } = storeToRefs(useTitleStore())
 
 const documentationIds: string[] = [] // TODO not available for now
 
@@ -204,11 +202,6 @@ watch(species, () => {
           triggerRef(parameters)
           triggerRef(style)
           map.value?.update(data.center, data.zoom)
-          title.value = data.title
-          subtitle.value = data.subtitle
-          if (data.title) {
-            document.title = data.title
-          }
         })
     })
 })

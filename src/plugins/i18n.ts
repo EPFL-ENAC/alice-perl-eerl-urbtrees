@@ -1,10 +1,14 @@
-import { createI18n } from "vue-i18n"
+import { createI18n } from 'vue-i18n'
+import { useCookies } from 'vue3-cookies'
 
 import en from '@/locales/en.json'
 import fr from '@/locales/fr.json'
 
+const { cookies } = useCookies()
+const locale = cookies.get('locale')
+
 export default createI18n({
-  locale: "en",
+  locale: locale,
   fallbackLocale: 'en',
   messages: {
     en,

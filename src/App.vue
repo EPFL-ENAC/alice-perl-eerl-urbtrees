@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import { RouterView } from 'vue-router'
-import { useTitleStore } from './stores/title'
 import epflLogoUrl from '/EPFL_Logo_184X53.svg'
 import { mdiInformation } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
+import { useLocale } from 'vuetify'
+import { useCookies } from 'vue3-cookies'
 
-const { title, subtitle } = storeToRefs(useTitleStore())
+const { current } = useLocale()
 const { locale } = useI18n({ useScope: 'global' })
+const { cookies } = useCookies()
 
 function onLocale(lang: string) {
   locale.value = lang
+  current.value = lang
+  cookies.set('locale', lang, '365d')
+}
+
+function getCurrentLocaleOrFallback() {
+  return ['en', 'fr'].includes(current.value) ? current.value : 'en'
 }
 </script>
 
@@ -18,8 +25,8 @@ function onLocale(lang: string) {
   <v-app>
     <v-app-bar flat height="68">
       <v-app-bar-title>
-        <div v-if="title" class="text-h5">{{ title }}</div>
-        <div v-if="subtitle" class="text-subtitle-2">{{ $t(subtitle) }}</div>
+        <div class="text-h5">URBTREES</div>
+        <div class="text-subtitle-2">{{ $t('app_subtitle') }}</div>
       </v-app-bar-title>
 
       <v-btn
@@ -27,7 +34,7 @@ function onLocale(lang: string) {
         color="primary"
         class="mr-2"
       >
-        {{ locale }}
+        {{ getCurrentLocaleOrFallback() }}
       </v-btn>
 
     <v-menu activator="#locales-activator">
