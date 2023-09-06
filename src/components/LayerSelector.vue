@@ -24,11 +24,12 @@ const emit = defineEmits<{
 const { t, locale } = useI18n({ useScope: 'global' })
 
 const genre = ref<string>()
-const genreItems = computed<any[]>(() => {
+const genreItems = computed<{ id: string; label: string }[]>(() => {
   const key = `GENRE_${locale.value === 'en' ? 'eng' : locale.value}`
   return props.species
     .filter((value, index, array) => array.map((g) => g.GENRE_lat).indexOf(value.GENRE_lat) === index)
-    .map((g) => { return { id: g.GENRE_lat.toLowerCase().replace(' ', '_'), label: `${g.GENRE_lat} (${(g as any)[key]})` }})
+    .map((g) => { return { id: g.GENRE_lat.toLowerCase().replace(' ', '_'), label: `${(g as any)[key]} (${g.GENRE_lat})` }})
+    .sort(itemCompare)
 })
 
 const tab = ref<string>()
@@ -40,13 +41,13 @@ const selectableTabs = computed<SelectableItem[]>(() =>
 const selectedTab = computed<SelectableSingleItem | undefined>(() =>
   selectableTabs.value.find((item) => item.id === tab.value) as SelectableSingleItem
 )
-const tabItems = computed(() => selectableTabs.value.map((item) => {
+const tabItems = computed<{ id: string; label: string }[]>(() => selectableTabs.value.map((item) => {
   const label = (item as any)[`label_${locale.value}`]
   return {
     id: item.id,
-    label: `${item.label} (${label})`
+    label: `${label} (${item.label})`
   }
-}))
+}).sort(itemCompare))
 
 const scale = ref<string>()
 const scaleItems = computed<any[]>(() => props.scales?.
@@ -106,6 +107,15 @@ watch(() => props.scales,
   { immediate: true }
 )
 
+function itemCompare(a: { id: string; label: string }, b: { id: string; label: string }) {
+  if (a.label < b.label) {
+    return -1
+  }
+  if (a.label > b.label) {
+    return 1
+  }
+  return 0
+}
 
 function updateLayers() {
   const sels = []
