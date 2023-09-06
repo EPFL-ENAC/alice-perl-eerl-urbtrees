@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SelectableItem, SelectableGroupItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
+import { mdiInformation } from '@mdi/js'
 import { watch, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -16,6 +17,7 @@ const props = withDefaults(
 )
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
+  (e: 'documentation', value: string): void
 }>()
 
 const { t, locale } = useI18n({ useScope: 'global' })
@@ -105,6 +107,9 @@ function getSpecieShareLabel(sel: SpeciesItem) {
   return formatNumber(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
 }
 
+function showDocumentation(type: string) {
+  emit('documentation', type)
+}
 </script>
 
 <template>
@@ -122,8 +127,11 @@ function getSpecieShareLabel(sel: SpeciesItem) {
         ></v-select>
         <div
           v-if="selectedSpecie"
-          class="pl-4 mb-3 text-caption font-weight-bold text-grey-darken-1">
-          {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }} ({{ getGenusShareLabel(selectedSpecie) }})
+          class="pl-4 mb-3">
+          <span class="text-caption font-weight-bold text-grey-darken-1">
+            {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }} ({{ getGenusShareLabel(selectedSpecie) }})
+          </span>
+          <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation('genus')"></v-btn>
         </div>
         <v-select
           v-model="tab"
@@ -137,8 +145,11 @@ function getSpecieShareLabel(sel: SpeciesItem) {
         ></v-select>
         <div
           v-if="selectedSpecie"
-          class="pl-4 mb-3 text-caption font-weight-bold text-grey-darken-1">
-          {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }} ({{ getSpecieShareLabel(selectedSpecie) }})
+          class="pl-4 mb-3">
+          <span class="text-caption font-weight-bold text-grey-darken-1">
+            {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }} ({{ getSpecieShareLabel(selectedSpecie) }})
+          </span>
+          <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation('specie')"></v-btn>
         </div>
       </div>
     </v-card-text>

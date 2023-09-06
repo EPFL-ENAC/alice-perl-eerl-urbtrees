@@ -2,7 +2,7 @@
 import LayerSelector from '@/components/LayerSelector.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
 import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
-import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew } from '@mdi/js'
+import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew, mdiInformation } from '@mdi/js'
 import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import axios from 'axios'
 import { marked } from 'marked'
@@ -38,17 +38,22 @@ const docId = ref<string>()
 const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 
-const documentationIds: string[] = [] // TODO not available for now
+const documentationIds: string[] = [
+  "genus", "specie", "voc", "pm10", "ofp", "o3"
+]
 
 const species = ref<SpeciesItem[]>([])
 
 onMounted(() => {
   documentationIds.forEach((id: string) => {
-    axios
-    .get<string>(`${id}.md`)
-    .then((response) => response.data)
-    .then((data) => {
-      docHtml.value[id] = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
+    ["en", "fr"].forEach((lang) => {
+      const lid = `${id}_${lang}`
+      axios
+        .get<string>(`${lid}.md`)
+        .then((response) => response.data)
+        .then((data) => {
+          docHtml.value[lid] = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
+      })
     })
   })
 
@@ -76,11 +81,11 @@ onMounted(() => {
               if (row.mean_PM10_kg) {
                 row.measures.push('pm10')
               }
-              if (row.mean_O3_kg) {
-                row.measures.push('o3')
-              }
               if (row.mean_OFP_kg) {
                 row.measures.push('ofp')
+              }
+              if (row.mean_O3_kg) {
+                row.measures.push('o3')
               }
               return row
             })
@@ -232,8 +237,8 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
   const addtionalIds: string[] = singleItems.value
     .filter((item: SelectableSingleItem) => item.ids && selectedLayerIds.value.includes(item.id))
     .flatMap((item: SelectableSingleItem) => item.ids)
-  const measureIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
-  const ids: string[] = [selectedLayerIds.value, measureIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
+  const measureLayerIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
+  const ids: string[] = [selectedLayerIds.value, measureLayerIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
   console.log(ids)
   return ids
 })
@@ -290,21 +295,22 @@ function getLegendScaleEntryCaption(entry: ScaleEntry): string {
 }
 
 function showDocumentation(id: string) {
-  if (docId.value === id) {
+  const lid = `${id}_${locale.value}`
+  if (docId.value === lid) {
     drawerRight.value = !drawerRight.value
   } else {
-    if (id in docHtml.value) {
-      drawerHtml.value = docHtml.value[id]
+    if (lid in docHtml.value) {
+      drawerHtml.value = docHtml.value[lid]
     } else {
-      drawerHtml.value = `Ooops, no documentation about '${id}'`
+      drawerHtml.value = `Ooops, there is no documentation about '${id}'`
     }
-    docId.value = id
+    docId.value = lid
     drawerRight.value = true
   }
 }
 
 function formatNumber(nb: number) {
-  return new Intl.NumberFormat(`${locale.value}`).format(nb)
+  return new Intl.NumberFormat(`${locale.value}`).format(Math.round(nb * 100) / 100)
 }
 
 function isMeasurePositive(measure: string) {
@@ -326,7 +332,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
 </script>
 
 <template>
-  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 300 : 400" @click="drawerRail = false">
+  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 300 : 450" @click="drawerRail = false">
     <v-list density="compact" nav>
       <v-list-item :prepend-icon="drawerRail ? mdiChevronRight : undefined">
         <template #append>
@@ -343,6 +349,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           v-model="selectedLayerIds"
           :items="parameters?.selectableItems"
           :species="species"
+          @documentation="(type) => showDocumentation(type)"
         />
       </v-list-item>
       <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
@@ -370,6 +377,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     <thead>
                       <tr>
                         <th></th>
+                        <th></th>
                         <th>{{ $t('mean') }}</th>
                         <th>{{ $t('sum') }}</th>
                       </tr>
@@ -377,8 +385,13 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     <tbody>
                       <template v-for="measure in selectedSpecie.measures" :key="measure">
                         <tr>
-                          <td class="text-caption">{{ getLegendTitle(measure, false) }}</td>
-                          <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                          <td class="text-caption pr-0">
+                            {{ getLegendTitle(measure, false) }}
+                          </td>
+                          <td class="pa-0">
+                            <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation(measure)"></v-btn>
+                          </td>
+                          <td class="text-no-wrap pr-0" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
                             {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
                           </td>
                           <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
@@ -439,19 +452,9 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           </v-card-text>
         </v-card>
       </v-list-item>
-      <v-list-item v-if="documentationIds.length>0" :prepend-icon="mdiBookOpenPageVariant">
-        <v-list-item-title>
-          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">Documentation</span>
-        </v-list-item-title>
-      </v-list-item>
-      <v-list-item v-if="documentationIds.length>0 && !drawerRail">
-        <div v-for="doc of documentationIds" :key="doc">
-          <v-btn variant="text" class="text-none" @click="showDocumentation(doc)">{{ doc }}</v-btn>
-        </div>
-      </v-list-item>
     </v-list>
   </v-navigation-drawer>
-  <v-navigation-drawer v-if="drawerRight" permanent location="right" :width="mobile ? 400 : 800">
+  <v-navigation-drawer v-if="drawerRight" permanent location="right" :width="mobile ? 200 : 400">
     <v-list>
       <v-list-item>
         <template #append>

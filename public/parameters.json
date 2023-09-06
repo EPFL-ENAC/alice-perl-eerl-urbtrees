@@ -98,53 +98,6 @@
       ]
     },
     {
-      "id": "o3",
-      "title": "Ozone absorption",
-      "unit": "g/year",
-      "scale": [
-        {
-          "range": [0, 31],
-          "color": "#440154"
-        },
-        {
-            "range": [31, 110],
-            "color": "#482878"
-        },
-        {
-            "range": [110, 153],
-            "color": "#3e4989"
-        },
-        {
-            "range": [153, 228],
-            "color": "#31688e"
-        },
-        {
-            "range": [228, 269],
-            "color": "#26828e"
-        },
-        {
-            "range": [269, 441],
-            "color": "#1f9e89"
-        },
-        {
-            "range": [441, 717],
-            "color": "#35b779"
-        },
-        {
-            "range": [717, 1049],
-            "color": "#6ece58"
-        },
-        {
-            "range": [1049, 2235],
-            "color": "#b5de2b"
-        },
-        {
-            "range": [2235, 50000],
-            "color": "#fde725"
-        }
-      ]
-    },
-    {
       "id": "ofp",
       "title": "Ozone formation potential",
       "unit": "kg/year",
@@ -187,6 +140,53 @@
         },
         {
             "range": [0, 0.021],
+            "color": "#fde725"
+        }
+      ]
+    },
+    {
+      "id": "o3",
+      "title": "Ozone absorption",
+      "unit": "g/year",
+      "scale": [
+        {
+          "range": [0, 31],
+          "color": "#440154"
+        },
+        {
+            "range": [31, 110],
+            "color": "#482878"
+        },
+        {
+            "range": [110, 153],
+            "color": "#3e4989"
+        },
+        {
+            "range": [153, 228],
+            "color": "#31688e"
+        },
+        {
+            "range": [228, 269],
+            "color": "#26828e"
+        },
+        {
+            "range": [269, 441],
+            "color": "#1f9e89"
+        },
+        {
+            "range": [441, 717],
+            "color": "#35b779"
+        },
+        {
+            "range": [717, 1049],
+            "color": "#6ece58"
+        },
+        {
+            "range": [1049, 2235],
+            "color": "#b5de2b"
+        },
+        {
+            "range": [2235, 50000],
             "color": "#fde725"
         }
       ]

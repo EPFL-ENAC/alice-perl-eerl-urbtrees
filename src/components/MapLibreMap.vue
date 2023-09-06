@@ -153,35 +153,35 @@ watch(
             let html = `
               <div class="marked">
               <p class="text-overline">${fprops.NOM_COMPLET_lat} (${label})</p>
-              <table style="width: 100%">
+              <table>
                 <tbody>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('municipality')}</td>
-                  <td>${fprops.COMMUNE}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-0">${t('municipality')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${fprops.COMMUNE}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('leaf_type')}</td>
-                  <td>${t(fprops.leaf)}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-0">${t('leaf_type')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${t(fprops.leaf)}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('leaf_area')}</td>
-                  <td>${formatNumber(fprops.L_area)}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-0">${t('leaf_area')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.L_area, t('m2'))}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('VOC g/year')}</td>
-                  <td>${formatNumber(fprops.VOC_g_y) ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('voc')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.VOC_g_y / 1000, t('kg/year')) ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('O3 g/year')}</td>
-                  <td>${formatNumber(fprops.O3_rm_gy) ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('pm10')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.PM10_rm_gy / 1000, t('kg/year')) ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('OFP kg/year')}</td>
-                  <td>${formatNumber(fprops.OFP_kg_y) ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('ofp')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.OFP_kg_y, t('kg/year')) ?? "-"}</td>
                 </tr>
                 <tr>
-                  <td class="text-caption font-weight-bold text-left pr-1">${t('PM10 g/year')}</td>
-                  <td>${formatNumber(fprops.PM10_rm_gy) ?? "-"}</td>
+                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('o3')}</td>
+                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.O3_rm_gy / 1000, t('kg/year')) ?? "-"}</td>
                 </tr>
                 </tbody>
               </table>
@@ -229,8 +229,9 @@ function filterLayers() {
   }
 }
 
-function formatNumber(nb: number) {
-  return nb === undefined ? undefined : new Intl.NumberFormat(`${locale.value}`).format(nb)
+function formatNumber(nb: number, unit: string) {
+  
+  return nb === undefined || isNaN(nb) ? undefined : `${new Intl.NumberFormat(`${locale.value}`).format(Math.round(nb * 100) / 100)} ${unit}`
 }
 
 </script>
