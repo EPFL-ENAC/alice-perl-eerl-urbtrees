@@ -2,7 +2,7 @@
 import LayerSelector from '@/components/LayerSelector.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
 import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
-import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew } from '@mdi/js'
+import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew, mdiInformation } from '@mdi/js'
 import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import axios from 'axios'
 import { marked } from 'marked'
@@ -38,17 +38,22 @@ const docId = ref<string>()
 const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 
-const documentationIds: string[] = [] // TODO not available for now
+const documentationIds: string[] = [
+  "genus", "specie", "voc", "pm10", "ofp", "o3"
+]
 
 const species = ref<SpeciesItem[]>([])
 
 onMounted(() => {
   documentationIds.forEach((id: string) => {
-    axios
-    .get<string>(`${id}.md`)
-    .then((response) => response.data)
-    .then((data) => {
-      docHtml.value[id] = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
+    ["en", "fr"].forEach((lang) => {
+      const lid = `${id}_${lang}`
+      axios
+        .get<string>(`${lid}.md`)
+        .then((response) => response.data)
+        .then((data) => {
+          docHtml.value[lid] = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
+      })
     })
   })
 
@@ -76,11 +81,11 @@ onMounted(() => {
               if (row.mean_PM10_kg) {
                 row.measures.push('pm10')
               }
-              if (row.mean_O3_kg) {
-                row.measures.push('o3')
-              }
               if (row.mean_OFP_kg) {
                 row.measures.push('ofp')
+              }
+              if (row.mean_O3_kg) {
+                row.measures.push('o3')
               }
               return row
             })
@@ -144,6 +149,7 @@ watch(species, () => {
           id: item.id,
           source: item.id,
           type: 'circle',
+          // no opacity, until researchers have decided whether this layer is to be included or not
           paint: {
             'circle-radius': [
               'interpolate',
@@ -162,10 +168,10 @@ watch(species, () => {
               19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
             ],
             'circle-color': '#aaaaaa',
-            'circle-opacity': 0.3,
+            'circle-opacity': 0,
             'circle-stroke-color': '#888888',
             'circle-stroke-width': 1,
-            'circle-stroke-opacity': 0.3
+            'circle-stroke-opacity': 0
           },
           layout: { visibility: 'none' }
         })
@@ -231,13 +237,26 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
   const addtionalIds: string[] = singleItems.value
     .filter((item: SelectableSingleItem) => item.ids && selectedLayerIds.value.includes(item.id))
     .flatMap((item: SelectableSingleItem) => item.ids)
-  const ids: string[] = [selectedLayerIds.value, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
+  const measureLayerIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
+  const ids: string[] = [selectedLayerIds.value, measureLayerIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
+  console.log(ids)
   return ids
 })
 
-const scale = computed<string | undefined>(() => {
-  const scaleIds: string[] | undefined = parameters.value?.legendScales.map((scl) => scl.id)
-  return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds?.includes(scl)).pop()
+const scale = ref<string>()
+const scaleItems = computed<{ id: string; title: string }[] | undefined>(() => parameters.value?.legendScales?.
+  filter((scl) => selectedSpecie.value && selectedSpecie.value.measures.includes(scl.id))
+  .map((scl) => {
+    return {
+      id: scl.id,
+      title: t(scl.id)
+    }
+  }))
+
+watch(() => selectedLayerIds.value, () => {
+  if (scale.value === undefined || !scaleItems.value?.map(scl => scl.id).includes(scale.value)) { 
+    scale.value = scaleItems.value?.[0].id
+  }
 })
 
 function getSpecie(sel: SelectableSingleItem | undefined) {
@@ -276,37 +295,22 @@ function getLegendScaleEntryCaption(entry: ScaleEntry): string {
 }
 
 function showDocumentation(id: string) {
-  if (docId.value === id) {
+  const lid = `${id}_${locale.value}`
+  if (docId.value === lid) {
     drawerRight.value = !drawerRight.value
   } else {
-    if (id in docHtml.value) {
-      drawerHtml.value = docHtml.value[id]
+    if (lid in docHtml.value) {
+      drawerHtml.value = docHtml.value[lid]
     } else {
-      drawerHtml.value = `Ooops, no documentation about '${id}'`
+      drawerHtml.value = `Ooops, there is no documentation about '${id}'`
     }
-    docId.value = id
+    docId.value = lid
     drawerRight.value = true
   }
 }
 
 function formatNumber(nb: number) {
-  return new Intl.NumberFormat(`${locale.value}`).format(nb)
-}
-
-function getGenusTreeCountLabel(sel: SpeciesItem) {
-  return formatNumber(sel['GENUS TREE COUNT'])
-}
-
-function getGenusShareLabel(sel: SpeciesItem) {
-  return formatNumber(Number.parseFloat(sel['GENUS SHARE'].replace('%', ''))) + '%'
-}
-
-function getSpecieTreeCountLabel(sel: SpeciesItem) {
-  return formatNumber(sel['SPECIE TREE COUNT'])
-}
-
-function getSpecieShareLabel(sel: SpeciesItem) {
-  return formatNumber(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
+  return new Intl.NumberFormat(`${locale.value}`).format(Math.round(nb * 100) / 100)
 }
 
 function isMeasurePositive(measure: string) {
@@ -316,31 +320,19 @@ function isMeasurePositive(measure: string) {
 function getSpecieMeasureMeanLabel(sel: SpeciesItem, measure: string) {
   const field = `mean_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = formatNumber((sel as any)[field])
-  const sign = isMeasurePositive(measure) ? '+' : '-'
-  return `${sign}${val}`
+  return val
 }
 
 function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = formatNumber((sel as any)[field])
-  const sign = isMeasurePositive(measure) ? '+' : '-'
-  return `${sign}${val}`
-}
-
-function getSpecieGenusLabel(sel: SpeciesItem) {
-  const label = (sel as any)[`GENRE_${locale.value}`]
-  return `${sel.GENRE_lat} (${label})`
-}
-
-function getSpecieLabel(sel: SpeciesItem) {
-  const label = (sel as any)[`NOM_COMPLET_${locale.value}`]
-  return `${sel.NOM_COMPLET_lat} (${label})`
+  return val
 }
 
 </script>
 
 <template>
-  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 300 : 400" @click="drawerRail = false">
+  <v-navigation-drawer :rail="drawerRail" permanent :width="mobile ? 300 : 450" @click="drawerRail = false">
     <v-list density="compact" nav>
       <v-list-item :prepend-icon="drawerRail ? mdiChevronRight : undefined">
         <template #append>
@@ -357,12 +349,12 @@ function getSpecieLabel(sel: SpeciesItem) {
           v-model="selectedLayerIds"
           :items="parameters?.selectableItems"
           :species="species"
-          :scales="parameters?.legendScales"
+          @documentation="(type) => showDocumentation(type)"
         />
       </v-list-item>
       <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
         <v-list-item-title>
-          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('legends') }}</span>
+          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('measures') }}</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="!drawerRail && selectedItemWithLegend && selectedSpecie">
@@ -370,40 +362,21 @@ function getSpecieLabel(sel: SpeciesItem) {
           <v-card-text class="pa-0">
             <v-row>
               <v-col cols="12">
-                <div class="mb-2 text-overline">{{ getSpecieGenusLabel(selectedSpecie) }}</div>
-                <v-row class="mb-1">
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }}
-                    </v-chip>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ getGenusShareLabel(selectedSpecie) }}
-                    </v-chip>
-                  </v-col>
-                </v-row>
-                <div class="mb-5 text-caption text-grey-darken-1">{{ $t('share_genus') }}</div>
+                <v-select
+                  v-model="scale"
+                  :label="$t('measure')"
+                  :items="scaleItems"
+                  item-title="title"
+                  item-value="id"
+                  density="compact"
+                  class="mt-2"
+                ></v-select>
 
-                <div class="mb-2 text-overline">{{ getSpecieLabel(selectedSpecie) }}</div>
-                <v-row class="mb-1">
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }}
-                    </v-chip>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ getSpecieShareLabel(selectedSpecie) }}
-                    </v-chip>
-                  </v-col>
-                </v-row>
-                <div class="mb-3 text-caption text-grey-darken-1">{{ $t('share_specie') }}</div>
-                
                 <v-responsive>
                   <v-table density="compact" class="mb-2">
                     <thead>
                       <tr>
+                        <th></th>
                         <th></th>
                         <th>{{ $t('mean') }}</th>
                         <th>{{ $t('sum') }}</th>
@@ -412,8 +385,13 @@ function getSpecieLabel(sel: SpeciesItem) {
                     <tbody>
                       <template v-for="measure in selectedSpecie.measures" :key="measure">
                         <tr>
-                          <td class="text-caption">{{ getLegendTitle(measure, false) }}</td>
-                          <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                          <td class="text-caption pr-0">
+                            {{ getLegendTitle(measure, false) }}
+                          </td>
+                          <td class="pa-0">
+                            <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation(measure)"></v-btn>
+                          </td>
+                          <td class="text-no-wrap pr-0" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
                             {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
                           </td>
                           <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
@@ -474,19 +452,9 @@ function getSpecieLabel(sel: SpeciesItem) {
           </v-card-text>
         </v-card>
       </v-list-item>
-      <v-list-item v-if="documentationIds.length>0" :prepend-icon="mdiBookOpenPageVariant">
-        <v-list-item-title>
-          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">Documentation</span>
-        </v-list-item-title>
-      </v-list-item>
-      <v-list-item v-if="documentationIds.length>0 && !drawerRail">
-        <div v-for="doc of documentationIds" :key="doc">
-          <v-btn variant="text" class="text-none" @click="showDocumentation(doc)">{{ doc }}</v-btn>
-        </div>
-      </v-list-item>
     </v-list>
   </v-navigation-drawer>
-  <v-navigation-drawer v-if="drawerRight" permanent location="right" :width="mobile ? 400 : 800">
+  <v-navigation-drawer v-if="drawerRight" permanent location="right" :width="mobile ? 200 : 400">
     <v-list>
       <v-list-item>
         <template #append>
