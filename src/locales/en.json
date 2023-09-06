@@ -1,8 +1,9 @@
 {
   "app_subtitle": "Disentangling the benefits provided by urban trees for nature-based solution planning: from urban cooling to sociocultural services",
   "view": "View",
-  "layers": "Species and measures",
+  "layers": "Genus and Species",
   "legends": "Legends",
+  "measures": "Measures",
   "documentation": "Documentation",
   "genus": "Genus",
   "specie": "Specie",

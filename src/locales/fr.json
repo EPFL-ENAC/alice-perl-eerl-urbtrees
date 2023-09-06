@@ -1,8 +1,9 @@
 {
   "app_subtitle": "Identifier les avantages des arbres urbains pour la planification de solutions basées sur la nature : du refroidissement urbain aux services socioculturels",
   "view": "Voir",
-  "layers": "Espèces et mesures",
+  "layers": "Genres et espèces",
   "legends": "Légendes",
+  "measures": "Mesures",
   "documentation": "Documentation",
   "genus": "Genre",
   "specie": "Espèce",

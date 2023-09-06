@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { LegendScale } from '@/utils/jsonWebMap'
 import type { SelectableItem, SelectableGroupItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import { watch, ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -8,13 +7,11 @@ const props = withDefaults(
   defineProps<{
     modelValue?: string[]
     items?: SelectableItem[],
-    scales?: LegendScale[],
     species: SpeciesItem[]
   }>(),
   {
     modelValue: () => [],
     items: () => [],
-    scales: () => []
   }
 )
 const emit = defineEmits<{
@@ -38,9 +35,6 @@ const selectableTabs = computed<SelectableItem[]>(() =>
     .flatMap((item: SelectableItem) => (item as SelectableGroupItem).children)
     .filter((item: SelectableSingleItem) => item.genre === genre.value) // filter species by selected genre
 )
-const selectedTab = computed<SelectableSingleItem | undefined>(() =>
-  selectableTabs.value.find((item) => item.id === tab.value) as SelectableSingleItem
-)
 const tabItems = computed<{ id: string; label: string }[]>(() => selectableTabs.value.map((item) => {
   const label = (item as any)[`label_${locale.value}`]
   return {
@@ -49,38 +43,12 @@ const tabItems = computed<{ id: string; label: string }[]>(() => selectableTabs.
   }
 }).sort(itemCompare))
 
-const scale = ref<string>()
-const scaleItems = computed<any[]>(() => props.scales?.
-  filter((scl) => selectedTab.value && selectedTab.value.measures.includes(scl.id))
-  .map((scl) => {
-    return {
-      id: scl.id,
-      title: t(scl.id)
-    }
-  }))
+const selectedSpecie = computed<SpeciesItem | undefined>(() => props.species.find((item) => item.id === tab.value))
 
 watch(genre, () => {
   // select the default species or the first one
   const selected = selectableTabs.value.find((item: SelectableItem) => item.selected)
   tab.value = selected ? selected.id : selectableTabs.value[0].id
-})
-
-watch(tab, () => {
-  if (scaleItems.value && scaleItems.value.length > 0) {
-    // keep current scale selection if it is valid or set the first one
-    const selectedScale = scaleItems.value.find((scl) => scl.id === scale.value)
-    if (selectedScale) {
-      scale.value = selectedScale.id
-    } else {
-      scale.value = scaleItems.value[0].id
-    }
-  } else {
-    scale.value = undefined
-  }
-  updateLayers()
-})
-
-watch(scale, () => {
   updateLayers()
 })
 
@@ -92,17 +60,6 @@ watch(() => props.items,
       // find the genre of the default species
       genre.value = speciesGroup.children.find((item) => item.selected)?.genre
     }
-    updateLayers()
-  },
-  { immediate: true }
-)
-
-watch(() => props.scales,
-  (value: LegendScale[]) => {
-    if (value && value.length>0) {
-      scale.value = value[0].id
-    }
-    updateLayers()
   },
   { immediate: true }
 )
@@ -123,12 +80,29 @@ function updateLayers() {
     const map = selectableTabs.value.filter((item: SelectableItem) => item.id === tab.value).pop()
     if (map) {
       sels.push(map.id)
-      if (scale.value) {
-        sels.push(`${map.id}_${scale.value}`)
-      }
     }
   }
   emit('update:modelValue', sels)
+}
+
+function formatNumber(nb: number) {
+  return new Intl.NumberFormat(`${locale.value}`).format(nb)
+}
+
+function getGenusTreeCountLabel(sel: SpeciesItem) {
+  return formatNumber(sel['GENUS TREE COUNT'])
+}
+
+function getGenusShareLabel(sel: SpeciesItem) {
+  return formatNumber(Number.parseFloat(sel['GENUS SHARE'].replace('%', ''))) + '%'
+}
+
+function getSpecieTreeCountLabel(sel: SpeciesItem) {
+  return formatNumber(sel['SPECIE TREE COUNT'])
+}
+
+function getSpecieShareLabel(sel: SpeciesItem) {
+  return formatNumber(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
 }
 
 </script>
@@ -144,8 +118,13 @@ function updateLayers() {
           item-title="label"
           item-value="id"
           density="compact"
-          class="mt-2"
+          class="mt-2 mb-0"
         ></v-select>
+        <div
+          v-if="selectedSpecie"
+          class="pl-4 mb-3 text-caption font-weight-bold text-grey-darken-1">
+          {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }} ({{ getGenusShareLabel(selectedSpecie) }})
+        </div>
         <v-select
           v-model="tab"
           :label="$t('specie')"
@@ -154,18 +133,14 @@ function updateLayers() {
           item-value="id"
           density="compact"
           class="mt-2"
+          @update:model-value="updateLayers"
         ></v-select>
-        <v-select
-          v-model="scale"
-          :label="$t('measure')"
-          :items="scaleItems"
-          item-title="title"
-          item-value="id"
-          density="compact"
-          class="mt-2"
-        ></v-select>
+        <div
+          v-if="selectedSpecie"
+          class="pl-4 mb-3 text-caption font-weight-bold text-grey-darken-1">
+          {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }} ({{ getSpecieShareLabel(selectedSpecie) }})
+        </div>
       </div>
-
     </v-card-text>
   </v-card>
 </template>

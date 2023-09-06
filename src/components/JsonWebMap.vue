@@ -144,6 +144,7 @@ watch(species, () => {
           id: item.id,
           source: item.id,
           type: 'circle',
+          // no opacity, until researchers have decided whether this layer is to be included or not
           paint: {
             'circle-radius': [
               'interpolate',
@@ -162,10 +163,10 @@ watch(species, () => {
               19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
             ],
             'circle-color': '#aaaaaa',
-            'circle-opacity': 0.3,
+            'circle-opacity': 0,
             'circle-stroke-color': '#888888',
             'circle-stroke-width': 1,
-            'circle-stroke-opacity': 0.3
+            'circle-stroke-opacity': 0
           },
           layout: { visibility: 'none' }
         })
@@ -231,13 +232,26 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
   const addtionalIds: string[] = singleItems.value
     .filter((item: SelectableSingleItem) => item.ids && selectedLayerIds.value.includes(item.id))
     .flatMap((item: SelectableSingleItem) => item.ids)
-  const ids: string[] = [selectedLayerIds.value, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
+  const measureIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
+  const ids: string[] = [selectedLayerIds.value, measureIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
+  console.log(ids)
   return ids
 })
 
-const scale = computed<string | undefined>(() => {
-  const scaleIds: string[] | undefined = parameters.value?.legendScales.map((scl) => scl.id)
-  return selectedLayerIds.value.map((id) => id.split('_').pop()).filter((scl) => scl && scaleIds?.includes(scl)).pop()
+const scale = ref<string>()
+const scaleItems = computed<{ id: string; title: string }[] | undefined>(() => parameters.value?.legendScales?.
+  filter((scl) => selectedSpecie.value && selectedSpecie.value.measures.includes(scl.id))
+  .map((scl) => {
+    return {
+      id: scl.id,
+      title: t(scl.id)
+    }
+  }))
+
+watch(() => selectedLayerIds.value, () => {
+  if (scale.value === undefined || !scaleItems.value?.map(scl => scl.id).includes(scale.value)) { 
+    scale.value = scaleItems.value?.[0].id
+  }
 })
 
 function getSpecie(sel: SelectableSingleItem | undefined) {
@@ -293,22 +307,6 @@ function formatNumber(nb: number) {
   return new Intl.NumberFormat(`${locale.value}`).format(nb)
 }
 
-function getGenusTreeCountLabel(sel: SpeciesItem) {
-  return formatNumber(sel['GENUS TREE COUNT'])
-}
-
-function getGenusShareLabel(sel: SpeciesItem) {
-  return formatNumber(Number.parseFloat(sel['GENUS SHARE'].replace('%', ''))) + '%'
-}
-
-function getSpecieTreeCountLabel(sel: SpeciesItem) {
-  return formatNumber(sel['SPECIE TREE COUNT'])
-}
-
-function getSpecieShareLabel(sel: SpeciesItem) {
-  return formatNumber(Number.parseFloat(sel['SPECIE SHARE'].replace('%', ''))) + '%'
-}
-
 function isMeasurePositive(measure: string) {
   return ['voc', 'ofp'].includes(measure)
 }
@@ -325,16 +323,6 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const val = formatNumber((sel as any)[field])
   const sign = isMeasurePositive(measure) ? '+' : '-'
   return `${sign}${val}`
-}
-
-function getSpecieGenusLabel(sel: SpeciesItem) {
-  const label = (sel as any)[`GENRE_${locale.value}`]
-  return `${sel.GENRE_lat} (${label})`
-}
-
-function getSpecieLabel(sel: SpeciesItem) {
-  const label = (sel as any)[`NOM_COMPLET_${locale.value}`]
-  return `${sel.NOM_COMPLET_lat} (${label})`
 }
 
 </script>
@@ -357,12 +345,11 @@ function getSpecieLabel(sel: SpeciesItem) {
           v-model="selectedLayerIds"
           :items="parameters?.selectableItems"
           :species="species"
-          :scales="parameters?.legendScales"
         />
       </v-list-item>
       <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
         <v-list-item-title>
-          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('legends') }}</span>
+          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('measures') }}</span>
         </v-list-item-title>
       </v-list-item>
       <v-list-item v-if="!drawerRail && selectedItemWithLegend && selectedSpecie">
@@ -370,36 +357,16 @@ function getSpecieLabel(sel: SpeciesItem) {
           <v-card-text class="pa-0">
             <v-row>
               <v-col cols="12">
-                <div class="mb-2 text-overline">{{ getSpecieGenusLabel(selectedSpecie) }}</div>
-                <v-row class="mb-1">
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ $t('trees_count', { count: getGenusTreeCountLabel(selectedSpecie) }) }}
-                    </v-chip>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ getGenusShareLabel(selectedSpecie) }}
-                    </v-chip>
-                  </v-col>
-                </v-row>
-                <div class="mb-5 text-caption text-grey-darken-1">{{ $t('share_genus') }}</div>
+                <v-select
+                  v-model="scale"
+                  :label="$t('measure')"
+                  :items="scaleItems"
+                  item-title="title"
+                  item-value="id"
+                  density="compact"
+                  class="mt-2"
+                ></v-select>
 
-                <div class="mb-2 text-overline">{{ getSpecieLabel(selectedSpecie) }}</div>
-                <v-row class="mb-1">
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ $t('trees_count', { count: getSpecieTreeCountLabel(selectedSpecie) }) }}
-                    </v-chip>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-chip :size="mobile ? 'small' : 'x-large'">
-                      {{ getSpecieShareLabel(selectedSpecie) }}
-                    </v-chip>
-                  </v-col>
-                </v-row>
-                <div class="mb-3 text-caption text-grey-darken-1">{{ $t('share_specie') }}</div>
-                
                 <v-responsive>
                   <v-table density="compact" class="mb-2">
                     <thead>
