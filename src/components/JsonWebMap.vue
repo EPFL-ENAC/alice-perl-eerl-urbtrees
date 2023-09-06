@@ -314,15 +314,13 @@ function isMeasurePositive(measure: string) {
 function getSpecieMeasureMeanLabel(sel: SpeciesItem, measure: string) {
   const field = `mean_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = formatNumber((sel as any)[field])
-  const sign = isMeasurePositive(measure) ? '+' : '-'
-  return `${sign}${val}`
+  return val
 }
 
 function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = formatNumber((sel as any)[field])
-  const sign = isMeasurePositive(measure) ? '+' : '-'
-  return `${sign}${val}`
+  return val
 }
 
 </script>
