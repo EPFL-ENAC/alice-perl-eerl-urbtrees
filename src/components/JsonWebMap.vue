@@ -112,7 +112,14 @@ watch(species, () => {
             source: item.genus,
             type: 'circle',
             paint: {
-              'circle-radius': 10,
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                13, 2,
+                15, 5,
+                19, 10
+              ],
               'circle-color': '#aaaaaa',
               'circle-opacity': 0.5,
               'circle-stroke-color': '#888888',
