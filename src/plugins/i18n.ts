@@ -8,7 +8,7 @@ const { cookies } = useCookies()
 const locale = cookies.get('locale')
 
 export default createI18n({
-  locale: locale,
+  locale: locale ?? 'en',
   fallbackLocale: 'en',
   messages: {
     en,
