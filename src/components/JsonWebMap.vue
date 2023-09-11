@@ -189,13 +189,14 @@ watch(species, () => {
           const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
           const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
           species.value.forEach((item) => {
+
             speciesItem.children.push({
               id: item.id,
               ids: [item.id],
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_en,
               label_fr: item.NOM_COMPLET_fr,
-              legendImage: `${CDN_DATA_URL}/specie_${item.id}_graph.png`,
+              legendImage: item.mean_PM10_kg && item.Net_O3 ? `${CDN_DATA_URL}/specie_${item.id}_graph.png` : undefined,
               measures: item.measures,
               genre: item.genus,
               selected: item.id === mostFrequentSpecies // most common, default one
@@ -228,7 +229,7 @@ const selectableLayerIds = computed<string[]>(() => singleItems.value.map((item)
 const selectedItemWithLegend = computed(() =>
   singleItems.value
     .filter((item: SelectableSingleItem) => selectedLayerIds.value.some((id: string) => item.id === id))
-    .filter((item: SelectableSingleItem) => item.legend !== undefined || item.legendImage !== undefined || item.legendScaleId !== undefined)
+    .filter((item: SelectableSingleItem) => item.legend !== undefined || item.legendImage !== undefined || item.legendScaleId !== undefined || item.measures)
     .pop()
 )
 const selectedSpecie = computed(() => getSpecie(selectedItemWithLegend.value))
@@ -239,7 +240,6 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
     .flatMap((item: SelectableSingleItem) => item.ids)
   const measureLayerIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
   const ids: string[] = [selectedLayerIds.value, measureLayerIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
-  console.log(ids)
   return ids
 })
 
@@ -254,8 +254,10 @@ const scaleItems = computed<{ id: string; title: string }[] | undefined>(() => p
   }))
 
 watch(() => selectedLayerIds.value, () => {
-  if (scale.value === undefined || !scaleItems.value?.map(scl => scl.id).includes(scale.value)) { 
-    scale.value = scaleItems.value?.[0].id
+  if (scale.value === undefined || !scaleItems.value?.map(scl => scl.id).includes(scale.value)) {
+    if (scaleItems.value && scaleItems.value.length > 0) {
+      scale.value = scaleItems.value?.[0].id
+    }
   }
 })
 

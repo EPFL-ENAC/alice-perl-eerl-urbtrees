@@ -88,13 +88,13 @@ colors = {
             "color": "#b5de2b"
         },
         {
-            "range": [2235, 50000],
+            "range": [2235, 120000],
             "color": "#fde725"
         }
     ],
     "ofp": [
         {
-            "range": [28.197, 471.189],
+            "range": [28.197, 700],
             "color": "#440154"
         },
         {
@@ -172,7 +172,7 @@ colors = {
             "color": "#b5de2b"
         },
         {
-            "range": [628, 8225],
+            "range": [628, 40000],
             "color": "#fde725"
         }
     ]
@@ -189,6 +189,7 @@ def getColor(measure, value):
     """
     Get the color from the measure's categorical color scheme.
     """
+    #print(f"getColor({measure}, {value})")  
     color = "#000000"
     if value != None:
         scheme = [d for d in colors[measure] if d["range"][0] <= value and value < d["range"][1]]
@@ -285,7 +286,7 @@ def transform(filePath):
             fieldName = outLayerDefn.GetFieldDefn(i).GetNameRef()
             if fieldName == "L_area":
                 fieldValue = inFeature.GetField(inFeature.GetFieldIndex(fieldName))
-                radius = math.sqrt(fieldValue/3.14159)
+                radius = math.sqrt(fieldValue/3.14159) if fieldValue != None else 1
             elif fieldName == "VOC_g_y":
                 color["voc"] = getColor("voc", inFeature.GetField(inFeature.GetFieldIndex(fieldName)))
             elif fieldName == "O3_rm_gy":
@@ -325,5 +326,5 @@ def transform(filePath):
     outDataSet.Destroy()
 
 # main
-for file in glob.glob("./input/*/specie/*/*_voc.geojson"):
+for file in glob.glob("./input/*/specie_*.geojson"):
     transform(file)
