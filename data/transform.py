@@ -196,7 +196,7 @@ def getColor(measure, value):
         color = scheme[0]["color"]
     return color
 
-def transform(filePath):
+def transform_specie(filePath):
     fileName = os.path.basename(filePath)
     baseName = fileName.replace(".geojson", "").replace("_voc", "").replace("specie_", "")
 
@@ -325,6 +325,92 @@ def transform(filePath):
     inDataSet.Destroy()
     outDataSet.Destroy()
 
+
+def transform_genus(filePath):
+    fileName = os.path.basename(filePath)
+    baseName = fileName.replace(".geojson", "")
+
+    print(f"Transforming {fileName}")
+
+    # get the input layer
+    inDataSet = driver.Open(filePath)
+    inLayer = inDataSet.GetLayer()
+
+    inSpatialRef = inLayer.GetSpatialRef()
+
+    # loading projection
+    sr = osr.SpatialReference(str(inSpatialRef))
+
+    # detecting EPSG/SRID
+    res = sr.AutoIdentifyEPSG()
+
+    srid = sr.GetAuthorityCode(None)
+
+    # input SpatialReference
+    inSpatialRef.ImportFromEPSG(int(srid))
+
+    # output SpatialReference
+    outSpatialRef = osr.SpatialReference()
+    outSpatialRef.ImportFromEPSG(4326)
+    outSpatialRef.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+    # create the CoordinateTransformation
+    coordTrans = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+
+    # create the output layer
+    outputShapefile = f"./output/{baseName}.geojson"
+
+    if os.path.exists(outputShapefile):
+        driver.DeleteDataSource(outputShapefile)
+
+    outDataSet = driver.CreateDataSource(outputShapefile)
+    outLayer = outDataSet.CreateLayer(baseName, geom_type=ogr.wkbPoint)
+
+    # add fields
+    inLayerDefn = inLayer.GetLayerDefn()
+
+    for i in range(0, inLayerDefn.GetFieldCount()):
+        fieldDefn = inLayerDefn.GetFieldDefn(i)
+        fieldName = fieldDefn.GetNameRef()
+        if fieldName in fieldNames:
+            outLayer.CreateField(fieldDefn)
+
+    # get the output layer's feature definition
+    outLayerDefn = outLayer.GetLayerDefn()
+
+    # loop through the input features
+    inFeature = inLayer.GetNextFeature()
+
+    while inFeature:
+        # get the input geometry
+        geom = inFeature.GetGeometryRef()
+        # reproject the geometry
+        geom.Transform(coordTrans)
+        # create a new feature
+        outFeature = ogr.Feature(outLayerDefn)
+        # set the geometry
+        outFeature.SetGeometry(geom)
+        
+        # set the attributes
+        for i in range(0, outLayerDefn.GetFieldCount()):
+            fieldName = outLayerDefn.GetFieldDefn(i).GetNameRef()
+            fieldValue = inFeature.GetField(inFeature.GetFieldIndex(fieldName))
+            outFeature.SetField(fieldName, fieldValue)
+        
+        # add the feature to the shapefile
+        outLayer.CreateFeature(outFeature)
+        # destroy the features and get the next input feature
+        outFeature.Destroy()
+        inFeature.Destroy()
+        inFeature = inLayer.GetNextFeature()
+
+    # close the shapefiles
+    inDataSet.Destroy()
+    outDataSet.Destroy()
+
 # main
 for file in glob.glob("./input/*/specie_*.geojson"):
-    transform(file)
+    transform_specie(file)
+
+for file in glob.glob("./input/*/genus_*.geojson"):
+    transform_genus(file)

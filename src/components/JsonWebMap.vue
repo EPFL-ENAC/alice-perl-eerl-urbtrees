@@ -101,6 +101,27 @@ watch(species, () => {
     .then((data) => {
       // append source/layer for each species read from the csv
       species.value.forEach((item) => {
+        if (!data.sources[item.genus]) {
+          // one source for each genus
+          data.sources[item.genus] = {
+            type: 'geojson',
+            data: `${CDN_DATA_URL}/genus_${item.genus}_true.geojson`
+          }
+          data.layers.push({
+            id: item.genus,
+            source: item.genus,
+            type: 'circle',
+            paint: {
+              'circle-radius': 10,
+              'circle-color': '#aaaaaa',
+              'circle-opacity': 0.5,
+              'circle-stroke-color': '#888888',
+              'circle-stroke-width': 1,
+              'circle-stroke-opacity': 0.5
+            },
+            layout: { visibility: 'none' }
+          })
+        }
         // one source for each specie
         data.sources[item.id] = {
           type: 'geojson',
@@ -192,7 +213,7 @@ watch(species, () => {
 
             speciesItem.children.push({
               id: item.id,
-              ids: [item.id],
+              ids: [item.genus],
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_en,
               label_fr: item.NOM_COMPLET_fr,
@@ -240,6 +261,7 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
     .flatMap((item: SelectableSingleItem) => item.ids)
   const measureLayerIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
   const ids: string[] = [selectedLayerIds.value, measureLayerIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
+  console.log(ids)
   return ids
 })
 
