@@ -116,11 +116,53 @@ watch(species, () => {
                 'interpolate',
                 ['linear'],
                 ['zoom'],
-                13, 2,
-                15, 5,
-                19, 10
+                14, 1,
+                // @ts-ignore
+                15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                18, ['number', ['get', 'D_COUR_M'], 5],
+                // @ts-ignore
+                19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
               ],
               'circle-color': '#aaaaaa',
+              'circle-opacity': 0.5,
+              'circle-stroke-color': '#888888',
+              'circle-stroke-width': 1,
+              'circle-stroke-opacity': 0.5
+            },
+            layout: { visibility: 'none' }
+          })
+          // one source for each genus
+          data.sources[`${item.genus}_other`] = {
+            type: 'geojson',
+            data: `${CDN_DATA_URL}/genus_${item.genus}_false.geojson`
+          }
+          data.layers.push({
+            id: `${item.genus}_other`,
+            source: `${item.genus}_other`,
+            type: 'circle',
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                14, 1,
+                // @ts-ignore
+                15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                18, ['number', ['get', 'D_COUR_M'], 5],
+                // @ts-ignore
+                19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
+              ],
+              'circle-color': '#ffffff',
               'circle-opacity': 0.5,
               'circle-stroke-color': '#888888',
               'circle-stroke-width': 1,
@@ -217,7 +259,6 @@ watch(species, () => {
           const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
           const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
           species.value.forEach((item) => {
-
             speciesItem.children.push({
               id: item.id,
               ids: [item.genus],
