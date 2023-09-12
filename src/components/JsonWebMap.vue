@@ -309,7 +309,6 @@ const extendedSelectedLayerIds = computed<string[]>(() => {
     .flatMap((item: SelectableSingleItem) => item.ids)
   const measureLayerIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
   const ids: string[] = [selectedLayerIds.value, measureLayerIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
-  console.log(ids)
   return ids
 })
 
@@ -351,19 +350,6 @@ function getLegendTitle(id: string, withUnit: boolean): string | undefined {
     return t(scale.id)
   }
   return undefined
-}
-
-function getLegendScale(id: string): ScaleEntry[] | undefined {
-  return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.scale
-}
-
-function getLegendScaleEntryCaption(entry: ScaleEntry): string {
-  let rval = ''
-  if (entry.range)
-    rval = `${formatNumber(entry.range[0])} - ${formatNumber(entry.range[1])}`
-  if (entry.unit)
-    rval = `${rval} ${entry.unit }`
-  return rval
 }
 
 function showDocumentation(id: string) {
@@ -501,24 +487,6 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                   </v-hover>
                   <div class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</div>
                 </div>
-
-                <div v-if="scale" class="mb-3 text-overline">{{ getLegendTitle(scale, true) }}</div>
-                <v-table v-if="scale" density="compact">
-                  <tbody>
-                    <tr
-                      v-for="entry in getLegendScale(scale)"
-                      :key="entry.color"
-                    >
-                      <td :style="`background-color: ${entry.color}`"></td>
-                      <td>
-                        <div>{{ entry.label }}</div>
-                        <div class="text-caption">
-                          {{ getLegendScaleEntryCaption(entry) }}
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </v-table>
               </v-col>
             </v-row>
           </v-card-text>
@@ -550,9 +518,11 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           :zoom="parameters?.zoom"
           :style-spec="style"
           :themes="themeItems"
+          :scales="parameters?.legendScales"
           :selectable-layer-ids="selectableLayerIds"
           :selected-layer-ids="extendedSelectedLayerIds"
           :popup-layer-ids="parameters?.popupLayerIds"
+          :selected-scale-id="scale"
         />
       </v-col>
     </v-row>

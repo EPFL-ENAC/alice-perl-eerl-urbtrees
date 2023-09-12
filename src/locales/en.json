@@ -32,5 +32,9 @@
   "deciduous": "Deciduous",
   "evergreen": "Evergreen",
   "en": "English",
-  "fr": "Français"
+  "fr": "Français",
+  "more emissions": "more emissions",
+  "less emissions": "less emissions",
+  "more deposition": "more deposition",
+  "less deposition": "less deposition"
 }

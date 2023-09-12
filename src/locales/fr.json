@@ -36,5 +36,9 @@
   "deciduous": "Caduque",
   "evergreen": "Persistant",
   "en": "English",
-  "fr": "Français"
+  "fr": "Français",
+  "more emissions": "plus d'émissions",
+  "less emissions": "moins d'émissions",
+  "more deposition": "plus de filtration",
+  "less deposition": "moins de filtration"
 }
