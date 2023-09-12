@@ -72,6 +72,12 @@
                 "title": {
                     "type": "string"
                 },
+                "titleStart": {
+                    "type": "string"
+                },
+                "titleEnd": {
+                    "type": "string"
+                },
                 "unit": {
                     "type": "string"
                 },

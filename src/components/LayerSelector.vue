@@ -41,7 +41,7 @@ const tabItems = computed<{ id: string; label: string }[]>(() => selectableTabs.
   const label = (item as any)[`label_${locale.value}`]
   return {
     id: item.id,
-    label: `${label} (${item.label})`
+    label: item.label.length === 0 ? label : `${label} (${item.label})`
   }
 }).sort(itemCompare))
 

@@ -38,8 +38,11 @@ const docId = ref<string>()
 const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 
+const allMeasures: string[] = [
+  'voc', 'pm10', 'ofp', 'o3'
+]
 const documentationIds: string[] = [
-  "genus", "specie", "voc", "pm10", "ofp", "o3"
+  "genus", "specie", "graph", ...allMeasures
 ]
 
 const species = ref<SpeciesItem[]>([])
@@ -101,6 +104,76 @@ watch(species, () => {
     .then((data) => {
       // append source/layer for each species read from the csv
       species.value.forEach((item) => {
+        if (!data.sources[item.genus]) {
+          // one source for each genus
+          data.sources[item.genus] = {
+            type: 'geojson',
+            data: `${CDN_DATA_URL}/genus_${item.genus}_true.geojson`
+          }
+          data.layers.push({
+            id: item.genus,
+            source: item.genus,
+            type: 'circle',
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                14, 1,
+                // @ts-ignore
+                15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                18, ['number', ['get', 'D_COUR_M'], 5],
+                // @ts-ignore
+                19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
+              ],
+              'circle-color': '#aaaaaa',
+              'circle-opacity': 0.5,
+              'circle-stroke-color': '#888888',
+              'circle-stroke-width': 1,
+              'circle-stroke-opacity': 0.5
+            },
+            layout: { visibility: 'none' }
+          })
+          // one source for each genus
+          data.sources[`${item.genus}_other`] = {
+            type: 'geojson',
+            data: `${CDN_DATA_URL}/genus_${item.genus}_false.geojson`
+          }
+          data.layers.push({
+            id: `${item.genus}_other`,
+            source: `${item.genus}_other`,
+            type: 'circle',
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                14, 1,
+                // @ts-ignore
+                15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
+                // @ts-ignore
+                18, ['number', ['get', 'D_COUR_M'], 5],
+                // @ts-ignore
+                19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
+              ],
+              'circle-color': '#ffffff',
+              'circle-opacity': 0.5,
+              'circle-stroke-color': '#888888',
+              'circle-stroke-width': 1,
+              'circle-stroke-opacity': 0.5
+            },
+            layout: { visibility: 'none' }
+          })
+        }
         // one source for each specie
         data.sources[item.id] = {
           type: 'geojson',
@@ -144,37 +217,6 @@ watch(species, () => {
             layout: { visibility: 'none' }
           })
         })
-        // crown layer
-        data.layers.push({
-          id: item.id,
-          source: item.id,
-          type: 'circle',
-          // no opacity, until researchers have decided whether this layer is to be included or not
-          paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              14, 1,
-              // @ts-ignore
-              15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
-              // @ts-ignore
-              16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
-              // @ts-ignore
-              17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
-              // @ts-ignore
-              18, ['number', ['get', 'D_COUR_M'], 5],
-              // @ts-ignore
-              19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
-            ],
-            'circle-color': '#aaaaaa',
-            'circle-opacity': 0,
-            'circle-stroke-color': '#888888',
-            'circle-stroke-width': 1,
-            'circle-stroke-opacity': 0
-          },
-          layout: { visibility: 'none' }
-        })
       })
       style.value = data
     })
@@ -188,11 +230,11 @@ watch(species, () => {
           // find the most frequent specie and set it as the default one
           const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
           const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
+          const allGenus: string[] = []
           species.value.forEach((item) => {
-
             speciesItem.children.push({
               id: item.id,
-              ids: [item.id],
+              ids: [item.genus],
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_en,
               label_fr: item.NOM_COMPLET_fr,
@@ -202,7 +244,25 @@ watch(species, () => {
               selected: item.id === mostFrequentSpecies // most common, default one
             })
             data.popupLayerIds?.push(item.id)
+            if (data.popupLayerIds && !data.popupLayerIds.includes(item.genus)) {
+              data.popupLayerIds.push(item.genus)
+              allGenus.push(item.genus)
+            }
             item.measures.forEach((measure) => data.popupLayerIds?.push(`${item.id}_${measure}`))
+          })
+          // add a layer for other species of each genus
+          allGenus.forEach((genus) => {
+            speciesItem.children.push({
+              id: `${genus}_other`,
+              ids: [],
+              label: '',
+              label_en: 'Other',
+              label_fr: 'Autre',
+              measures: allMeasures,
+              genre: genus,
+              selected: false
+            })
+            data.popupLayerIds?.push(`${genus}_other`)
           })
           parameters.value = data
           triggerRef(parameters)
@@ -281,19 +341,6 @@ function getLegendTitle(id: string, withUnit: boolean): string | undefined {
     return t(scale.id)
   }
   return undefined
-}
-
-function getLegendScale(id: string): ScaleEntry[] | undefined {
-  return parameters.value?.legendScales?.find((scale: LegendScale) => scale.id === id)?.scale
-}
-
-function getLegendScaleEntryCaption(entry: ScaleEntry): string {
-  let rval = ''
-  if (entry.range)
-    rval = `${formatNumber(entry.range[0])} - ${formatNumber(entry.range[1])}`
-  if (entry.unit)
-    rval = `${rval} ${entry.unit }`
-  return rval
 }
 
 function showDocumentation(id: string) {
@@ -429,26 +476,11 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     </v-img>
                     </v-card>
                   </v-hover>
-                  <div class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</div>
+                  <div>
+                    <span class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</span>
+                    <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation('graph')"></v-btn>
+                  </div>
                 </div>
-
-                <div v-if="scale" class="mb-3 text-overline">{{ getLegendTitle(scale, true) }}</div>
-                <v-table v-if="scale" density="compact">
-                  <tbody>
-                    <tr
-                      v-for="entry in getLegendScale(scale)"
-                      :key="entry.color"
-                    >
-                      <td :style="`background-color: ${entry.color}`"></td>
-                      <td>
-                        <div>{{ entry.label }}</div>
-                        <div class="text-caption">
-                          {{ getLegendScaleEntryCaption(entry) }}
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </v-table>
               </v-col>
             </v-row>
           </v-card-text>
@@ -480,9 +512,11 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           :zoom="parameters?.zoom"
           :style-spec="style"
           :themes="themeItems"
+          :scales="parameters?.legendScales"
           :selectable-layer-ids="selectableLayerIds"
           :selected-layer-ids="extendedSelectedLayerIds"
           :popup-layer-ids="parameters?.popupLayerIds"
+          :selected-scale-id="scale"
         />
       </v-col>
     </v-row>

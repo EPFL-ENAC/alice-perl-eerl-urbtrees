@@ -6,6 +6,8 @@
     {
       "id": "voc",
       "title": "Volatile organic compounds",
+      "titleStart": "more emissions",
+      "titleEnd": "less emissions",
       "unit": "g/year",
       "scale": [
         {
@@ -53,6 +55,8 @@
     {
       "id": "pm10",
       "title": "PM10 particules deposition",
+      "titleStart": "less deposition",
+      "titleEnd": "more deposition",
       "unit": "g/year",
       "scale": [
         {
@@ -100,6 +104,8 @@
     {
       "id": "ofp",
       "title": "Ozone formation potential",
+      "titleStart": "more emissions",
+      "titleEnd": "less emissions",
       "unit": "kg/year",
       "scale": [
         {
@@ -147,6 +153,8 @@
     {
       "id": "o3",
       "title": "Ozone absorption",
+      "titleStart": "less deposition",
+      "titleEnd": "more deposition",
       "unit": "g/year",
       "scale": [
         {

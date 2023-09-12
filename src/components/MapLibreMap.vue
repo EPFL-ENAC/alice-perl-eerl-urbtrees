@@ -2,11 +2,14 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css'
 import 'maplibregl-theme-switcher/styles.css'
+import 'maplibregl-scale-legend/styles.css'
 
 import { geocoderApi } from '@/utils/geocoder'
 import { DivControl } from '@/utils/control'
 import { ThemeSwitcherControl } from 'maplibregl-theme-switcher'
 import type { ThemeDefinition } from 'maplibregl-theme-switcher'
+import { ScaleLegendControl } from 'maplibregl-scale-legend'
+import type { ScaleDefinition } from 'maplibregl-scale-legend'
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder'
 import {
   AttributionControl,
@@ -24,6 +27,7 @@ import {
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { SelectableSingleItem, SpeciesProps } from '@/utils/layerSelector'
+import type { LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
 
 defineExpose({
   update
@@ -37,6 +41,8 @@ const props = withDefaults(
     minZoom?: number
     maxZoom?: number
     themes: SelectableSingleItem[]
+    scales: LegendScale[]
+    selectedScaleId?: string
     selectableLayerIds?: string[]
     selectedLayerIds?: string[]
     popupLayerIds?: string[]
@@ -51,7 +57,9 @@ const props = withDefaults(
     selectableLayerIds: () => [],
     selectedLayerIds: () => [],
     popupLayerIds: () => [],
-    areaLayerIds: () => []
+    areaLayerIds: () => [],
+    scales: () => [],
+    selectedScaleId: undefined,
   }
 )
 
@@ -59,6 +67,7 @@ const { t, locale } = useI18n({ useScope: 'global' })
 
 const loading = ref(true)
 let map: Map | undefined = undefined
+const scaleControl = ref<ScaleLegendControl>()
 
 onMounted(() => {
   map = new Map({
@@ -136,6 +145,48 @@ watch(
 
 
 watch(
+  () => props.scales,
+  (scales) => {
+    if (scales) {
+      const scaleDefs: ScaleDefinition[] = scales.map((item: LegendScale) => {
+        return {
+          id: item.id,
+          title: t(item.id),
+          titleStart: item.titleStart ? t(item.titleStart) : undefined,
+          titleEnd: item.titleEnd ? t(item.titleEnd) : undefined,
+          scale: item.scale.map((entry: ScaleEntry) => {
+            const range: string[] | undefined = entry.range ? [
+                formatNumber(entry.range[0], "") ?? "",
+                formatNumber(entry.range[1], "") ?? ""
+              ] : undefined
+            return {
+              label: entry.label ? t(entry.label) : undefined,
+              color: entry.color,
+              range: range,
+              unit: entry.unit ? t(entry.unit) : (item.unit ? t(item.unit) : undefined)
+            }
+          })
+        }
+      })
+      scaleControl.value = new ScaleLegendControl(scaleDefs)
+      map?.addControl(scaleControl.value, 'top-left')
+      if (props.selectedScaleId) {
+        scaleControl.value.showScale(props.selectedScaleId)
+      }
+    }
+  },
+  { immediate: true }
+)
+
+watch(() => props.selectedScaleId, () => {
+  if (scaleControl.value) {
+    scaleControl.value.showScale(props.selectedScaleId)
+  }
+}, {
+  immediate: true
+})
+
+watch(
   () => props.popupLayerIds,
   (popupLayerIds) => {
     popupLayerIds.forEach((layerId) => {
@@ -149,10 +200,17 @@ watch(
           const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
-            const label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
+            let label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
+            if (!label) {
+              label = locale.value === 'en' ? fprops.GENRE_eng : (fprops as any)[`GENRE_${locale.value}`] 
+            }
+            let labelLat = fprops.NOM_COMPLET_lat
+            if (!labelLat) {
+              labelLat = fprops.GENRE_lat
+            }
             let html = `
               <div class="marked">
-              <p class="text-overline">${fprops.NOM_COMPLET_lat} (${label})</p>
+              <p class="text-overline">${label} (${labelLat})</p>
               <table>
                 <tbody>
                 <tr>
