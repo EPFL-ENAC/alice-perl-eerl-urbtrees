@@ -60,6 +60,9 @@ export interface SpeciesItem {
 
 // from geojson
 export interface SpeciesProps {
+  GENRE_lat: string
+  GENRE_fr: string
+  GENRE_eng: string
   NOM_COMPLET_lat: string
   NOM_COMPLET_fr: string
   NOM_COMPLET_eng: string

@@ -38,8 +38,11 @@ const docId = ref<string>()
 const docHtml = ref<any>({})
 const { mobile } = useDisplay()
 
+const allMeasures: string[] = [
+  'voc', 'pm10', 'ofp', 'o3'
+]
 const documentationIds: string[] = [
-  "genus", "specie", "voc", "pm10", "ofp", "o3"
+  "genus", "specie", ...allMeasures
 ]
 
 const species = ref<SpeciesItem[]>([])
@@ -214,37 +217,6 @@ watch(species, () => {
             layout: { visibility: 'none' }
           })
         })
-        // crown layer
-        data.layers.push({
-          id: item.id,
-          source: item.id,
-          type: 'circle',
-          // no opacity, until researchers have decided whether this layer is to be included or not
-          paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              14, 1,
-              // @ts-ignore
-              15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
-              // @ts-ignore
-              16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
-              // @ts-ignore
-              17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
-              // @ts-ignore
-              18, ['number', ['get', 'D_COUR_M'], 5],
-              // @ts-ignore
-              19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
-            ],
-            'circle-color': '#aaaaaa',
-            'circle-opacity': 0,
-            'circle-stroke-color': '#888888',
-            'circle-stroke-width': 1,
-            'circle-stroke-opacity': 0
-          },
-          layout: { visibility: 'none' }
-        })
       })
       style.value = data
     })
@@ -258,6 +230,7 @@ watch(species, () => {
           // find the most frequent specie and set it as the default one
           const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
           const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
+          const allGenus: string[] = []
           species.value.forEach((item) => {
             speciesItem.children.push({
               id: item.id,
@@ -273,8 +246,23 @@ watch(species, () => {
             data.popupLayerIds?.push(item.id)
             if (data.popupLayerIds && !data.popupLayerIds.includes(item.genus)) {
               data.popupLayerIds.push(item.genus)
+              allGenus.push(item.genus)
             }
             item.measures.forEach((measure) => data.popupLayerIds?.push(`${item.id}_${measure}`))
+          })
+          // add a layer for other species of each genus
+          allGenus.forEach((genus) => {
+            speciesItem.children.push({
+              id: `${genus}_other`,
+              ids: [],
+              label: '',
+              label_en: 'Other',
+              label_fr: 'Autre',
+              measures: allMeasures,
+              genre: genus,
+              selected: false
+            })
+            data.popupLayerIds?.push(`${genus}_other`)
           })
           parameters.value = data
           triggerRef(parameters)

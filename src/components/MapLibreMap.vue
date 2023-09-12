@@ -200,10 +200,17 @@ watch(
           const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
-            const label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
+            let label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
+            if (!label) {
+              label = locale.value === 'en' ? fprops.GENRE_eng : (fprops as any)[`GENRE_${locale.value}`] 
+            }
+            let labelLat = fprops.NOM_COMPLET_lat
+            if (!labelLat) {
+              labelLat = fprops.GENRE_lat
+            }
             let html = `
               <div class="marked">
-              <p class="text-overline">${label} (${fprops.NOM_COMPLET_lat})</p>
+              <p class="text-overline">${label} (${labelLat})</p>
               <table>
                 <tbody>
                 <tr>
