@@ -42,7 +42,7 @@ const allMeasures: string[] = [
   'voc', 'pm10', 'ofp', 'o3'
 ]
 const documentationIds: string[] = [
-  "genus", "specie", ...allMeasures
+  "genus", "specie", "graph", ...allMeasures
 ]
 
 const species = ref<SpeciesItem[]>([])
@@ -476,7 +476,10 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                     </v-img>
                     </v-card>
                   </v-hover>
-                  <div class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</div>
+                  <div>
+                    <span class="text-caption text-grey-darken-1">{{ $t('graph_caption') }}</span>
+                    <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation('graph')"></v-btn>
+                  </div>
                 </div>
               </v-col>
             </v-row>
