@@ -271,6 +271,9 @@ watch(species, () => {
               selected: item.id === mostFrequentSpecies // most common, default one
             })
             data.popupLayerIds?.push(item.id)
+            if (data.popupLayerIds && !data.popupLayerIds.includes(item.genus)) {
+              data.popupLayerIds.push(item.genus)
+            }
             item.measures.forEach((measure) => data.popupLayerIds?.push(`${item.id}_${measure}`))
           })
           parameters.value = data

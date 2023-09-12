@@ -203,7 +203,7 @@ watch(
             const label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
             let html = `
               <div class="marked">
-              <p class="text-overline">${fprops.NOM_COMPLET_lat} (${label})</p>
+              <p class="text-overline">${label} (${fprops.NOM_COMPLET_lat})</p>
               <table>
                 <tbody>
                 <tr>
