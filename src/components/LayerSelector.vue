@@ -67,6 +67,9 @@ watch(() => props.items,
 )
 
 function itemCompare(a: { id: string; label: string }, b: { id: string; label: string }) {
+  if (a.id.endsWith('_other')) {
+    return 1
+  }
   if (a.label < b.label) {
     return -1
   }

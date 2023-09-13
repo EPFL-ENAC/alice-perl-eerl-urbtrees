@@ -37,6 +37,8 @@ const drawerHtml = ref('')
 const docId = ref<string>()
 const docHtml = ref<any>({})
 const { mobile } = useDisplay()
+const scale = ref<string>()
+const showAllSpecies = ref<boolean>(true)
 
 const allMeasures: string[] = [
   'voc', 'pm10', 'ofp', 'o3'
@@ -44,6 +46,57 @@ const allMeasures: string[] = [
 const documentationIds: string[] = [
   "genus", "specie", "graph", ...allMeasures
 ]
+
+const genusPaint = {
+  'circle-radius': [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    14, 1,
+    15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
+    16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
+    17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
+    18, ['number', ['get', 'D_COUR_M'], 5],
+    19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
+  ],
+  'circle-color': '#aaaaaa',
+  'circle-opacity': 0.5,
+  'circle-stroke-color': '#888888',
+  'circle-stroke-width': 1,
+  'circle-stroke-opacity': 0.5
+}
+
+const measurePaint = (measure: string) => {
+  return {
+    'circle-radius': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      13, 2,
+      // @ts-ignore
+      14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
+      // @ts-ignore
+      15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
+      // @ts-ignore
+      16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
+      // @ts-ignore
+      17, ['number', ['get', 'radius'], 5],
+      // @ts-ignore
+      18, ['*', 2, ['number', ['get', 'radius'], 5]],
+      // @ts-ignore
+      19, ['*', 4, ['number', ['get', 'radius'], 5]]
+    ],
+    'circle-color': ['string', ['get', `color_${measure}`], '#000000'],
+    'circle-opacity': [
+      'case',
+      ['==', '#000000', ['get', `color_${measure}`]], 0,
+      0.7
+    ],
+    'circle-stroke-color': '#888888',
+    'circle-stroke-width': 1,
+    'circle-stroke-opacity': 0.3
+  }
+}
 
 const species = ref<SpeciesItem[]>([])
 
@@ -105,7 +158,8 @@ watch(species, () => {
       // append source/layer for each species read from the csv
       species.value.forEach((item) => {
         if (!data.sources[item.genus]) {
-          // one source for each genus
+          
+          // one source and layer for each genus (known specie)
           data.sources[item.genus] = {
             type: 'geojson',
             data: `${CDN_DATA_URL}/genus_${item.genus}_true.geojson`
@@ -114,106 +168,48 @@ watch(species, () => {
             id: item.genus,
             source: item.genus,
             type: 'circle',
-            paint: {
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                14, 1,
-                // @ts-ignore
-                15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
-                // @ts-ignore
-                16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
-                // @ts-ignore
-                17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
-                // @ts-ignore
-                18, ['number', ['get', 'D_COUR_M'], 5],
-                // @ts-ignore
-                19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
-              ],
-              'circle-color': '#aaaaaa',
-              'circle-opacity': 0.5,
-              'circle-stroke-color': '#888888',
-              'circle-stroke-width': 1,
-              'circle-stroke-opacity': 0.5
-            },
+            // @ts-ignore
+            paint: genusPaint,
             layout: { visibility: 'none' }
           })
-          // one source for each genus
-          data.sources[`${item.genus}_other`] = {
+          // one source and layer for each genus (unknown specie)
+          data.sources[`${item.genus}_alt`] = {
             type: 'geojson',
             data: `${CDN_DATA_URL}/genus_${item.genus}_false.geojson`
           }
           data.layers.push({
-            id: `${item.genus}_other`,
-            source: `${item.genus}_other`,
+            id: `${item.genus}_alt`,
+            source: `${item.genus}_alt`,
             type: 'circle',
-            paint: {
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                14, 1,
-                // @ts-ignore
-                15, ['*', 0.125, ['number', ['get', 'D_COUR_M'], 5]],
-                // @ts-ignore
-                16, ['*', 0.25, ['number', ['get', 'D_COUR_M'], 5]],
-                // @ts-ignore
-                17, ['*', 0.5, ['number', ['get', 'D_COUR_M'], 5]],
-                // @ts-ignore
-                18, ['number', ['get', 'D_COUR_M'], 5],
-                // @ts-ignore
-                19, ['*', 2, ['number', ['get', 'D_COUR_M'], 5]]
-              ],
-              'circle-color': '#ffffff',
-              'circle-opacity': 0.5,
-              'circle-stroke-color': '#888888',
-              'circle-stroke-width': 1,
-              'circle-stroke-opacity': 0.5
-            },
+            // @ts-ignore
+            paint: genusPaint,
             layout: { visibility: 'none' }
           })
+          // one layer per measure for the unkown species in the genus
+          allMeasures.forEach((measure) => {
+            data.layers.push({
+              id: `${item.genus}_other_${measure}`,
+              source: `${item.genus}_alt`,
+              type: 'circle',
+              // @ts-ignore
+              paint: measurePaint(measure),
+              layout: { visibility: 'none' }
+            })
+          })
         }
-        // one source for each specie
+        // one source for the specie
         data.sources[item.id] = {
           type: 'geojson',
           data: `${CDN_DATA_URL}/${item.id}.geojson`
         }
-        // folliage layers
+        // one layer per measure for the specie
         item.measures.forEach((measure) => {
           data.layers.push({
             id: `${item.id}_${measure}`,
             source: item.id,
             type: 'circle',
-            paint: {
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                13, 2,
-                // @ts-ignore
-                14, ['*', 0.125, ['number', ['get', 'radius'], 5]],
-                // @ts-ignore
-                15, ['*', 0.25, ['number', ['get', 'radius'], 5]],
-                // @ts-ignore
-                16, ['*', 0.5, ['number', ['get', 'radius'], 5]],
-                // @ts-ignore
-                17, ['number', ['get', 'radius'], 5],
-                // @ts-ignore
-                18, ['*', 2, ['number', ['get', 'radius'], 5]],
-                // @ts-ignore
-                19, ['*', 4, ['number', ['get', 'radius'], 5]]
-              ],
-              'circle-color': ['string', ['get', `color_${measure}`], '#000000'],
-              'circle-opacity': [
-                'case',
-                ['==', '#000000', ['get', `color_${measure}`]], 0,
-                0.7
-              ],
-              'circle-stroke-color': '#888888',
-              'circle-stroke-width': 1,
-              'circle-stroke-opacity': 0.3
-            },
+            // @ts-ignore
+            paint: measurePaint(measure),
             layout: { visibility: 'none' }
           })
         })
@@ -234,7 +230,7 @@ watch(species, () => {
           species.value.forEach((item) => {
             speciesItem.children.push({
               id: item.id,
-              ids: [item.genus],
+              ids: [item.genus, `${item.genus}_alt`],
               label: item.NOM_COMPLET_lat,
               label_en: item.NOM_COMPLET_en,
               label_fr: item.NOM_COMPLET_fr,
@@ -246,6 +242,7 @@ watch(species, () => {
             data.popupLayerIds?.push(item.id)
             if (data.popupLayerIds && !data.popupLayerIds.includes(item.genus)) {
               data.popupLayerIds.push(item.genus)
+              data.popupLayerIds.push(`${item.genus}_alt`)
               allGenus.push(item.genus)
             }
             item.measures.forEach((measure) => data.popupLayerIds?.push(`${item.id}_${measure}`))
@@ -254,7 +251,7 @@ watch(species, () => {
           allGenus.forEach((genus) => {
             speciesItem.children.push({
               id: `${genus}_other`,
-              ids: [],
+              ids: [genus, `${genus}_alt`],
               label: '',
               label_en: 'Other',
               label_fr: 'Autre',
@@ -263,6 +260,7 @@ watch(species, () => {
               selected: false
             })
             data.popupLayerIds?.push(`${genus}_other`)
+            allMeasures.forEach((measure) => data.popupLayerIds?.push(`${genus}_other_${measure}`))
           })
           parameters.value = data
           triggerRef(parameters)
@@ -295,17 +293,16 @@ const selectedItemWithLegend = computed(() =>
 const selectedSpecie = computed(() => getSpecie(selectedItemWithLegend.value))
 
 const extendedSelectedLayerIds = computed<string[]>(() => {
-  const addtionalIds: string[] = singleItems.value
+  const addtionalIds: string[] = showAllSpecies.value ? singleItems.value
     .filter((item: SelectableSingleItem) => item.ids && selectedLayerIds.value.includes(item.id))
-    .flatMap((item: SelectableSingleItem) => item.ids)
+    .flatMap((item: SelectableSingleItem) => item.ids) : []
   const measureLayerIds: string[] = selectedLayerIds.value.map((id) => `${id}_${scale.value}`)
   const ids: string[] = [selectedLayerIds.value, measureLayerIds, addtionalIds].flat().filter((value, index, array) => array.indexOf(value) === index)
   return ids
 })
 
-const scale = ref<string>()
 const scaleItems = computed<{ id: string; title: string }[] | undefined>(() => parameters.value?.legendScales?.
-  filter((scl) => selectedSpecie.value && selectedSpecie.value.measures.includes(scl.id))
+  filter((scl) => selectedItemWithLegend.value && selectedItemWithLegend.value.measures.includes(scl.id))
   .map((scl) => {
     return {
       id: scl.id,
@@ -400,13 +397,18 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           :species="species"
           @documentation="(type) => showDocumentation(type)"
         />
+        <v-checkbox
+          v-model="showAllSpecies"
+          density="compact"
+          :label="$t('show_all_species')">
+        </v-checkbox>
       </v-list-item>
       <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
         <v-list-item-title>
           <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('measures') }}</span>
         </v-list-item-title>
       </v-list-item>
-      <v-list-item v-if="!drawerRail && selectedItemWithLegend && selectedSpecie">
+      <v-list-item v-if="!drawerRail && selectedItemWithLegend">
         <v-card>
           <v-card-text class="pa-0">
             <v-row>
@@ -421,37 +423,39 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
                   class="mt-2"
                 ></v-select>
 
-                <v-responsive>
-                  <v-table density="compact" class="mb-2">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th></th>
-                        <th>{{ $t('mean') }}</th>
-                        <th>{{ $t('sum') }}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template v-for="measure in selectedSpecie.measures" :key="measure">
+                <div v-if="selectedSpecie">
+                  <v-responsive>
+                    <v-table density="compact" class="mb-2">
+                      <thead>
                         <tr>
-                          <td class="text-caption pr-0">
-                            {{ getLegendTitle(measure, false) }}
-                          </td>
-                          <td class="pa-0">
-                            <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation(measure)"></v-btn>
-                          </td>
-                          <td class="text-no-wrap pr-0" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
-                            {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
-                          </td>
-                          <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
-                            {{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg
-                          </td>
+                          <th></th>
+                          <th></th>
+                          <th>{{ $t('mean') }}</th>
+                          <th>{{ $t('sum') }}</th>
                         </tr>
-                      </template>
-                    </tbody>
-                  </v-table>
-                </v-responsive>
-                <div class="mb-5 text-caption text-grey-darken-1">{{ $t('annual_contrib') }}</div>
+                      </thead>
+                      <tbody>
+                        <template v-for="measure in selectedSpecie.measures" :key="measure">
+                          <tr>
+                            <td class="text-caption pr-0">
+                              {{ getLegendTitle(measure, false) }}
+                            </td>
+                            <td class="pa-0">
+                              <v-btn :icon="mdiInformation" flat size="small" @click="showDocumentation(measure)"></v-btn>
+                            </td>
+                            <td class="text-no-wrap pr-0" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                              {{ getSpecieMeasureMeanLabel(selectedSpecie, measure) }} kg
+                            </td>
+                            <td class="text-no-wrap" :class="isMeasurePositive(measure) ? 'text-red' : 'text-green'">
+                              {{ getSpecieMeasureSumLabel(selectedSpecie, measure) }} kg
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </v-table>
+                  </v-responsive>
+                  <div class="mb-5 text-caption text-grey-darken-1">{{ $t('annual_contrib') }}</div>
+                </div>
 
                 <div v-if="selectedItemWithLegend.legend" class="mb-5 text-caption">{{ selectedItemWithLegend.legend }}</div>
                 <div v-if="selectedItemWithLegend.legendImage" class="mb-5">

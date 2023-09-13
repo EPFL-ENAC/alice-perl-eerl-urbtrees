@@ -288,8 +288,7 @@ function filterLayers() {
 }
 
 function formatNumber(nb: number, unit: string) {
-  
-  return nb === undefined || isNaN(nb) ? undefined : `${new Intl.NumberFormat(`${locale.value}`).format(Math.round(nb * 100) / 100)} ${unit}`
+  return nb === undefined || isNaN(nb) ? '-' : `${new Intl.NumberFormat(`${locale.value}`).format(Math.round(nb * 100) / 100)} ${unit}`
 }
 
 </script>
