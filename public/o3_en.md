@@ -1,6 +1,6 @@
 ## Ozone Deposition	
 
-Ozone is a gas and is created when an O2 compound is joined by another oxygen particle, becoming O3 - a compound of three oxygen particles.
+Ozone is a gas and is created when an O₂ compound is joined by another oxygen particle, becoming O₃ - a compound of three oxygen particles.
 
 Ground level ozone is a pollutant created by volatile organic compounds and nitrogen oxides when they react with sunlight (UV rays). At ground level, ozone can have harmful effects on humans and our environment. 
  

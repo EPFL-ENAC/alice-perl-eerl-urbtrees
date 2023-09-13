@@ -62,6 +62,9 @@ const props = withDefaults(
     selectedScaleId: undefined,
   }
 )
+const emit = defineEmits<{
+  (e: 'documentation', value: string): void
+}>()
 
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -208,46 +211,116 @@ watch(
             if (!labelLat) {
               labelLat = fprops.GENRE_lat
             }
-            let html = `
-              <div class="marked">
-              <p class="text-overline">${label} (${labelLat})</p>
-              <table>
-                <tbody>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-0">${t('municipality')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${fprops.COMMUNE}</td>
-                </tr>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-0">${t('leaf_type')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${t(fprops.leaf)}</td>
-                </tr>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-0">${t('leaf_area')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.L_area, t('m2'))}</td>
-                </tr>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('voc')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.VOC_g_y / 1000, t('kg/year')) ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('pm10')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.PM10_rm_gy / 1000, t('kg/year')) ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('ofp')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.OFP_kg_y, t('kg/year')) ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td class="text-caption font-weight-bold text-left pl-1 pr-1">${t('o3')}</td>
-                  <td class="text-no-wrap pl-1 pr-1">${formatNumber(fprops.O3_rm_gy / 1000, t('kg/year')) ?? "-"}</td>
-                </tr>
-                </tbody>
-              </table>
-              </div>
-              `
+
+            const makeInfoLink = (id: string) => {
+              const aContainer = document.createElement("a");
+              aContainer.href = "#";
+              aContainer.classList.add("help", "ml-1");
+              aContainer.onclick = () => showDocumentation(id);
+              aContainer.innerText = "i"
+              return aContainer;
+            }
+            
+            const divContainer = document.createElement("div");
+            divContainer.classList.add("marked")
+            
+            const pContainer = document.createElement("p");
+            pContainer.classList.add("text-overline");
+            pContainer.innerText = `${label} (${labelLat})`
+            divContainer.appendChild(pContainer);
+
+            const tableContainer = document.createElement("table");
+            divContainer.appendChild(tableContainer);
+            const tbodyContainer = document.createElement("tbody");
+            tableContainer.appendChild(tbodyContainer);
+
+            let trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            let tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-0");
+            tdContainer.innerText = t('municipality');
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = fprops.COMMUNE;
+            trContainer.appendChild(tdContainer);
+
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-0");
+            tdContainer.innerText = t('leaf_type');
+            tdContainer.appendChild(makeInfoLink("leaf_type"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = t(fprops.leaf);
+            trContainer.appendChild(tdContainer);
+
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-0");
+            tdContainer.innerText = t('leaf_area');
+            tdContainer.appendChild(makeInfoLink("leaf_area"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = formatNumber(fprops.L_area, t('m2'));
+            trContainer.appendChild(tdContainer);
+
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-1");
+            tdContainer.innerText = `${t('voc')} `;
+            tdContainer.appendChild(makeInfoLink("voc"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = formatNumber(fprops.VOC_g_y / 1000, t('kg/year')) ?? "-";
+            trContainer.appendChild(tdContainer);
+
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-1");
+            tdContainer.innerText = t('pm10');
+            tdContainer.appendChild(makeInfoLink("pm10"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = formatNumber(fprops.PM10_rm_gy / 1000, t('kg/year')) ?? "-";
+            trContainer.appendChild(tdContainer);
+
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-1");
+            tdContainer.innerText = t('ofp');
+            tdContainer.appendChild(makeInfoLink("ofp"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = formatNumber(fprops.OFP_kg_y, t('kg/year')) ?? "-";
+            trContainer.appendChild(tdContainer);
+
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-1");
+            tdContainer.innerText = t('o3');
+            tdContainer.appendChild(makeInfoLink("o3"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = formatNumber(fprops.O3_rm_gy / 1000, t('kg/year')) ?? "-";
+            trContainer.appendChild(tdContainer);
+            
             popup
               .setLngLat(e.lngLat)
-              .setHTML(html)
+              //.setHTML(html)
+              .setDOMContent(divContainer)
               .addTo(map)
           }
         }
@@ -259,6 +332,10 @@ watch(
 watch([() => props.selectableLayerIds, () => props.selectedLayerIds], () => filterLayers(), {
   immediate: true
 })
+
+function showDocumentation(type: string) {
+  emit('documentation', type)
+}
 
 function update(center?: LngLatLike, zoom?: number) {
   if (map) {

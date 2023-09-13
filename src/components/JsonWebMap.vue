@@ -44,7 +44,7 @@ const allMeasures: string[] = [
   'voc', 'pm10', 'ofp', 'o3'
 ]
 const documentationIds: string[] = [
-  "genus", "specie", "graph", ...allMeasures
+  "genus", "specie", "graph", "leaf_type", "leaf_area", ...allMeasures
 ]
 
 const genusPaint = {
@@ -521,6 +521,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           :selected-layer-ids="extendedSelectedLayerIds"
           :popup-layer-ids="parameters?.popupLayerIds"
           :selected-scale-id="scale"
+          @documentation="(type) => showDocumentation(type)"
         />
       </v-col>
     </v-row>

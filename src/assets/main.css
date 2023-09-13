@@ -37,3 +37,15 @@ html {
 .scale-caption-title {
   text-wrap: nowrap;
 }
+
+a.help {
+  color: #ffffff;
+  background-color: #000000;
+  font-size: smaller;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  border-radius: 15px;
+  text-decoration: none;
+  text-align: center;
+}
