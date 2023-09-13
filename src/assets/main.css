@@ -33,3 +33,7 @@ html {
 .marked tr:nth-child(even) {
   background-color: #f6f8fa;
 }
+
+.scale-caption-title {
+  text-wrap: nowrap;
+}
