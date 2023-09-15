@@ -30,6 +30,14 @@ export interface Parameters {
    */
   zoom?: number
   /**
+   * Map default maxzoom level
+   */
+  maxZoom?: number
+  /**
+   * Map default minzoom level
+   */
+  minZoom?: number
+  /**
    * Layers with popup
    */
   popupLayerIds?: string[]
