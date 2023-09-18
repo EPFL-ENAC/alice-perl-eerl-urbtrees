@@ -52,8 +52,8 @@ const props = withDefaults(
     center: undefined,
     zoom: 12,
     aspectRatio: undefined,
-    minZoom: undefined,
-    maxZoom: undefined,
+    minZoom: 10,
+    maxZoom: 20,
     selectableLayerIds: () => [],
     selectedLayerIds: () => [],
     popupLayerIds: () => [],
@@ -78,6 +78,8 @@ onMounted(() => {
     style: props.styleSpec || '',
     center: props.center,
     zoom: props.zoom,
+    minZoom: props.minZoom,
+    maxZoom: props.maxZoom,
     trackResize: true,
     attributionControl: false
   })

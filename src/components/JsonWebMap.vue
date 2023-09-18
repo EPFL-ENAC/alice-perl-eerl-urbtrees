@@ -514,6 +514,8 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           ref="map"
           :center="parameters?.center"
           :zoom="parameters?.zoom"
+          :max-zoom="parameters?.maxZoom"
+          :min-zoom="parameters?.minZoom"
           :style-spec="style"
           :themes="themeItems"
           :scales="parameters?.legendScales"
