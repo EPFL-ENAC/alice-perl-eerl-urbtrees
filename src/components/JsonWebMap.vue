@@ -253,8 +253,8 @@ watch(species, () => {
               id: `${genus}_other`,
               ids: [genus, `${genus}_alt`],
               label: '',
-              label_en: 'Other',
-              label_fr: 'Autre',
+              label_en: 'Unknown',
+              label_fr: 'Inconnue',
               measures: allMeasures,
               genre: genus,
               selected: false
