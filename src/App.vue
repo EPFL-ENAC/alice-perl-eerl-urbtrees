@@ -77,6 +77,7 @@ function onSecretChange() {
               v-model="secret"
               label="Type secret and press Enter"
               hide-details="auto"
+              type="password"
               @change="onSecretChange"
             ></v-text-field>
           </v-col>
