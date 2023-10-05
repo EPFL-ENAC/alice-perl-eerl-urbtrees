@@ -53,12 +53,12 @@ const tabItems = computed<{ id: string; label: string }[]>(() => selectableTabs.
 
 const selectedSpecie = computed<SpeciesItem | undefined>(() => props.species.find((item) => item.id === tab.value))
 
-watch(genre, () => {
+function updateGenus() {
   // select the default species or the first one
   const selected = selectableTabs.value.find((item: SelectableItem) => item.selected)
   tab.value = selected ? selected.id : (selectableTabs.value.length > 0 ? selectableTabs.value[0].id : undefined)
   updateLayers()
-})
+}
 
 watch(() => props.items,
   (value: SelectableItem[]) => {
@@ -67,6 +67,7 @@ watch(() => props.items,
     if (speciesGroup) {
       // find the genre of the default species
       genre.value = speciesGroup.children.find((item) => item.selected)?.genre
+      updateGenus()
     }
   },
   { immediate: true }
@@ -147,6 +148,7 @@ function showDocumentation(type: string) {
           item-value="id"
           density="compact"
           class="mt-2 mb-0"
+          @update:model-value="updateGenus"
         ></v-select>
         <div
           v-if="selectedSpecie"
