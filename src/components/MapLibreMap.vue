@@ -64,6 +64,7 @@ const props = withDefaults(
 )
 const emit = defineEmits<{
   (e: 'documentation', value: string): void
+  (e: 'specie', value: string): void
 }>()
 
 const { t, locale } = useI18n({ useScope: 'global' })
@@ -205,6 +206,9 @@ watch(
           const fprops = e.features?.at(0)?.properties as SpeciesProps
           // display tree attributes
           if (fprops) {
+            const genus = fprops.GENRE_lat.toLowerCase().replace(' ', '_')
+            const specie = layerId.endsWith('_alt') ? `${genus}_other` : fprops.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
+            
             let label = locale.value === 'en' ? fprops.NOM_COMPLET_eng : (fprops as any)[`NOM_COMPLET_${locale.value}`]
             if (!label) {
               label = locale.value === 'en' ? fprops.GENRE_eng : (fprops as any)[`GENRE_${locale.value}`] 
@@ -223,14 +227,24 @@ watch(
               return aContainer;
             }
             
+            const makeSelectSpecieLink = (text: string) => {
+              const aContainer = document.createElement("a");
+              aContainer.href = "#";
+              aContainer.classList.add("ml-1");
+              aContainer.onclick = () => selectSpecie(`${genus}:${specie}`);
+              aContainer.innerText = `(${text})`
+              return aContainer;
+            }
+
             const divContainer = document.createElement("div");
             divContainer.classList.add("marked")
             
             const pContainer = document.createElement("p");
             pContainer.classList.add("text-overline");
-            pContainer.innerText = `${label} (${labelLat})`
+            pContainer.innerText = label
+            pContainer.appendChild(makeSelectSpecieLink(labelLat));
             divContainer.appendChild(pContainer);
-
+            
             const tableContainer = document.createElement("table");
             divContainer.appendChild(tableContainer);
             const tbodyContainer = document.createElement("tbody");
@@ -337,6 +351,10 @@ watch([() => props.selectableLayerIds, () => props.selectedLayerIds], () => filt
 
 function showDocumentation(type: string) {
   emit('documentation', type)
+}
+
+function selectSpecie(type: string) {
+  emit('specie', type)
 }
 
 function update(center?: LngLatLike, zoom?: number) {

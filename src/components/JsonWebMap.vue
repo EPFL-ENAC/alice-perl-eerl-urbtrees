@@ -27,6 +27,7 @@ const MARTIN_URL = props.martinUrl
 const { t, locale } = useI18n({ useScope: 'global' })
 
 const map = ref<InstanceType<typeof MapLibreMap>>()
+const selector = ref<InstanceType<typeof LayerSelector>>()
 const selectedLayerIds = ref<string[]>([])
 const style = shallowRef<StyleSpecification>()
 const parameters = shallowRef<Parameters>()
@@ -361,6 +362,11 @@ function showDocumentation(id: string) {
   }
 }
 
+function selectSpecie(id: string) {
+  const tokens = id.split(':')
+  selector.value?.update(tokens[0], tokens[1])
+}
+
 function formatNumber(nb: number) {
   return new Intl.NumberFormat(`${locale.value}`).format(Math.round(nb * 100) / 100)
 }
@@ -398,6 +404,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
       </v-list-item>
       <v-list-item v-show="!drawerRail">
         <LayerSelector
+          ref="selector"
           v-model="selectedLayerIds"
           :items="parameters?.selectableItems"
           :species="species"
@@ -531,6 +538,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           :popup-layer-ids="parameters?.popupLayerIds"
           :selected-scale-id="scale"
           @documentation="(type) => showDocumentation(type)"
+          @specie="(specie) => selectSpecie(specie)"
         />
       </v-col>
     </v-row>

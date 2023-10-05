@@ -38,6 +38,10 @@ html {
   text-wrap: nowrap;
 }
 
+a {
+  color: #000000;
+}
+
 a.help {
   color: #ffffff;
   background-color: #000000;

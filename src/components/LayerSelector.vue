@@ -20,6 +20,10 @@ const emit = defineEmits<{
   (e: 'documentation', value: string): void
 }>()
 
+defineExpose({
+  update
+})
+
 const { t, locale } = useI18n({ useScope: 'global' })
 
 const genre = ref<string>()
@@ -67,6 +71,12 @@ watch(() => props.items,
   },
   { immediate: true }
 )
+
+function update(genus: string, specie: string) {
+  genre.value = genus
+  tab.value = specie
+  updateLayers()
+}
 
 function itemCompare(a: { id: string; label: string }, b: { id: string; label: string }) {
   if (a.id.endsWith('_other')) {
