@@ -404,6 +404,7 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           @documentation="(type) => showDocumentation(type)"
         />
         <v-checkbox
+          v-if="selectedLayerIds.length === 1"
           v-model="showAllSpecies"
           density="compact"
           :label="$t('show_all_species')">

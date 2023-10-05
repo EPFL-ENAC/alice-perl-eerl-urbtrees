@@ -42,5 +42,6 @@
   "more deposition": "plus de filtration",
   "less deposition": "moins de filtration",
   "other": "Inconnue",
-  "show_all_species": "Montrer la position de tous les arbres dans le genre"
+  "show_all_species": "Montrer la position de tous les arbres dans le genre",
+  "all_genus": "(tous les genres)"
 }

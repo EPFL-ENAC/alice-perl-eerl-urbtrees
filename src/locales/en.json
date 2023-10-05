@@ -38,5 +38,6 @@
   "more deposition": "more deposition",
   "less deposition": "less deposition",
   "other": "Unknown",
-  "show_all_species": "Show position of each tree in the genus"
+  "show_all_species": "Show position of each tree in the genus",
+  "all_genus": "(all genus)"
 }
