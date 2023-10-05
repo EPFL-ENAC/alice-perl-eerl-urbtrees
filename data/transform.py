@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 from osgeo import ogr, osr
 import os
 import glob

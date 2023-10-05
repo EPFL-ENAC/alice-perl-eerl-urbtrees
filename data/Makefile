@@ -5,14 +5,16 @@ help:
 	@echo s3://${bucket}/alice-perl-eerl-urbtrees/${version}/
 
 transform:
-	./transform.py
+	python3 ./transform.py
+
+martin:
+	python3 ./martin.py
 
 cdn: cdn-data
 
 cdn-data:
 	mkdir -p data && \
 	cp input/*/*_graph.png data && \
-	cp output/*geojson data && \
 	s3cmd put --recursive --acl-public --guess-mime-type data s3://${bucket}/alice-perl-eerl-urbtrees/${version}/
 
 cdn-ls:

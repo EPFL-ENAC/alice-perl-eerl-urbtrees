@@ -18,9 +18,11 @@ const props = defineProps<{
   styleUrl: string
   parametersUrl: string
   cdnUrl: string
+  martinUrl: string
 }>()
 
 const CDN_DATA_URL = `${props.cdnUrl}/data`
+const MARTIN_URL = props.martinUrl
 
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -161,12 +163,13 @@ watch(species, () => {
           
           // one source and layer for each genus (known specie)
           data.sources[item.genus] = {
-            type: 'geojson',
-            data: `${CDN_DATA_URL}/genus_${item.genus}_true.geojson`
+            type: 'vector',
+            url: `${MARTIN_URL}/genus_${item.genus}_true`
           }
           data.layers.push({
             id: item.genus,
             source: item.genus,
+            'source-layer': `genus_${item.genus}_true`,            
             type: 'circle',
             // @ts-ignore
             paint: genusPaint,
@@ -174,12 +177,13 @@ watch(species, () => {
           })
           // one source and layer for each genus (unknown specie)
           data.sources[`${item.genus}_alt`] = {
-            type: 'geojson',
-            data: `${CDN_DATA_URL}/genus_${item.genus}_false.geojson`
+            type: 'vector',
+            url: `${MARTIN_URL}/genus_${item.genus}_false`
           }
           data.layers.push({
             id: `${item.genus}_alt`,
             source: `${item.genus}_alt`,
+            'source-layer': `genus_${item.genus}_false`,
             type: 'circle',
             // @ts-ignore
             paint: genusPaint,
@@ -190,6 +194,7 @@ watch(species, () => {
             data.layers.push({
               id: `${item.genus}_other_${measure}`,
               source: `${item.genus}_alt`,
+              'source-layer': `genus_${item.genus}_false`,
               type: 'circle',
               // @ts-ignore
               paint: measurePaint(measure),
@@ -199,14 +204,15 @@ watch(species, () => {
         }
         // one source for the specie
         data.sources[item.id] = {
-          type: 'geojson',
-          data: `${CDN_DATA_URL}/${item.id}.geojson`
+          type: 'vector',
+          url: `${MARTIN_URL}/${item.id}`
         }
         // one layer per measure for the specie
         item.measures.forEach((measure) => {
           data.layers.push({
             id: `${item.id}_${measure}`,
             source: item.id,
+            'source-layer': item.id,
             type: 'circle',
             // @ts-ignore
             paint: measurePaint(measure),
