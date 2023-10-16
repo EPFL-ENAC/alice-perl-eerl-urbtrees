@@ -113,7 +113,9 @@ function formatNumber(nb: number) {
 
 function getGenusTreeCountLabel(sel: SpeciesItem | undefined) {
   if (!sel) {
-    return formatNumber(props.species.reduce((acc, cur) => acc + cur['GENUS TREE COUNT'], 0))
+    return formatNumber(props.species
+      .filter((value, index, array) => array.map(sp => sp.GENRE_lat).indexOf(value.GENRE_lat) === index)
+      .reduce((acc, cur) => acc + cur['GENUS TREE COUNT'], 0))
   } else {
     return formatNumber(sel['GENUS TREE COUNT'])
   }
