@@ -104,5 +104,9 @@ export interface SpeciesProps {
   VOC_tot: number
   VOC_g_y: number
   OFP_kg_y: number
-  PM10_rm_gy: number
+  PM10_rm_gy: number,
+  color_voc: string,
+  color_pm10: string,
+  color_ofp: string,
+  color_o3: string
 }

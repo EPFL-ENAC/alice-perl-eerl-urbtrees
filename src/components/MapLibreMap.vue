@@ -236,6 +236,24 @@ watch(
               return aContainer;
             }
 
+            const makeColorSquare = (color: string) => {
+              const element = document.createElement("div");
+              if (color !== "#000000") {
+                element.style.backgroundColor = color;
+                element.style.width = "15px";
+                element.style.height = "15px";
+                element.style.marginRight = "5px";
+              }
+              element.style.display = "inline-block";
+              return element;
+            }
+
+            const makeMeasureText = (val: number) => {
+              const element = document.createElement("span")
+              element.innerText = formatNumber(val, t('kg/year')) ?? "-";
+              return element;
+            }
+
             const divContainer = document.createElement("div");
             divContainer.classList.add("marked")
             
@@ -294,7 +312,8 @@ watch(
             trContainer.appendChild(tdContainer);
             tdContainer = document.createElement("td");
             tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
-            tdContainer.innerText = formatNumber(fprops.VOC_g_y / 1000, t('kg/year')) ?? "-";
+            tdContainer.appendChild(makeColorSquare(fprops.color_voc))
+            tdContainer.appendChild(makeMeasureText(fprops.VOC_g_y / 1000))
             trContainer.appendChild(tdContainer);
 
             trContainer = document.createElement("tr");
@@ -306,7 +325,8 @@ watch(
             trContainer.appendChild(tdContainer);
             tdContainer = document.createElement("td");
             tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
-            tdContainer.innerText = formatNumber(fprops.PM10_rm_gy / 1000, t('kg/year')) ?? "-";
+            tdContainer.appendChild(makeColorSquare(fprops.color_pm10))
+            tdContainer.appendChild(makeMeasureText(fprops.PM10_rm_gy / 1000))
             trContainer.appendChild(tdContainer);
 
             trContainer = document.createElement("tr");
@@ -318,7 +338,8 @@ watch(
             trContainer.appendChild(tdContainer);
             tdContainer = document.createElement("td");
             tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
-            tdContainer.innerText = formatNumber(fprops.OFP_kg_y, t('kg/year')) ?? "-";
+            tdContainer.appendChild(makeColorSquare(fprops.color_ofp))
+            tdContainer.appendChild(makeMeasureText(fprops.OFP_kg_y))
             trContainer.appendChild(tdContainer);
 
             trContainer = document.createElement("tr");
@@ -330,7 +351,8 @@ watch(
             trContainer.appendChild(tdContainer);
             tdContainer = document.createElement("td");
             tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
-            tdContainer.innerText = formatNumber(fprops.O3_rm_gy / 1000, t('kg/year')) ?? "-";
+            tdContainer.appendChild(makeColorSquare(fprops.color_o3))
+            tdContainer.appendChild(makeMeasureText(fprops.O3_rm_gy / 1000))
             trContainer.appendChild(tdContainer);
             
             popup
