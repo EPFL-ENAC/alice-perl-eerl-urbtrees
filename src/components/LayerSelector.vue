@@ -75,7 +75,12 @@ watch(() => props.items,
 
 function update(genus: string, specie: string) {
   genre.value = genus
-  tab.value = specie
+  const found = tabItems.value.find((item) => item.id === specie)
+  if (found) {
+    tab.value = specie
+  } else {
+    tab.value = tabItems.value[tabItems.value.length - 1].id
+  }
   updateLayers()
 }
 
