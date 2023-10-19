@@ -82,7 +82,8 @@ onMounted(() => {
     minZoom: props.minZoom,
     maxZoom: props.maxZoom,
     trackResize: true,
-    attributionControl: false
+    attributionControl: false,
+    pixelRatio: window.devicePixelRatio || 1
   })
   map.addControl(new NavigationControl({}))
   map.addControl(new GeolocateControl({}))
@@ -198,7 +199,8 @@ watch(
     popupLayerIds.forEach((layerId) => {
       const popup = new Popup({
         closeButton: false,
-        closeOnClick: true
+        closeOnClick: true,
+        maxWidth: '420px'
       })
       map?.on('click', layerId, function (e) {
         if (map) {
