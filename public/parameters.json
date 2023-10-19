@@ -220,6 +220,11 @@
           "id": "dark",
           "label": "Dark",
           "selected": false
+        },
+        {
+          "id": "swissimage",
+          "label": "Aerial",
+          "selected": false
         }
       ]
     },
