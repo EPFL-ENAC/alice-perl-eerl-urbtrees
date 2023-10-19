@@ -158,6 +158,10 @@ watch(species, () => {
     .get<StyleSpecification>(props.styleUrl)
     .then((response) => response.data)
     .then((data) => {
+      // deviceRatio == 1 then tileSize 256
+      // deviceRatio === 2 then tileSize 128
+      const newTileSize = 256 / (window.devicePixelRatio || 1)
+      data.sources = Object.keys(data.sources).reduce((acc: any, key: string) => { acc[key] = {...data.sources[key], tileSize: newTileSize}; return acc;}, {})
       // append source/layer for each species read from the csv
       species.value.forEach((item) => {
         if (!data.sources[item.genus]) {
