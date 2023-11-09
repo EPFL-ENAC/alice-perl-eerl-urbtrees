@@ -10,7 +10,7 @@
   "measure": "Mesure",
   "share_genus": "Part du genre dans l'inventaire des arbres de Genève (ICA)",
   "share_specie": "Part de l'espèce dans l'inventaire des arbres de Genève (ICA)",
-  "annual_contrib": "Contributions de l’espèce à l’échelle cantonale (moyenne par arbre et somme totale)",
+  "annual_contrib": "Contributions de l'espèce à l'échelle cantonale (moyenne par arbre et somme totale)",
   "graph_caption": "Bilan net d'ozone et filtration de particules PM₁₀",
   "mean": "Moyenne (kg/arbre/année)",
   "sum": "Somme (kg/arbre/année)",
@@ -46,5 +46,10 @@
   "other": "Inconnue",
   "show_all_species": "Montrer la position de tous les arbres dans le genre",
   "all_genus": "(tous les genres)",
-  "start": "Commencer"
+  "start": "Commencer",
+  "legend": "Légende",
+  "tree_legend": "Arbre isolé représenté par sa surface totale de feuillage (somme de chaque feuille) convertie en cercle abstrait. Ce cercle ne correspond pas au diamètre de la couronne : pour des arbres anciens, la surface totale de feuillage peut atteindre plusieurs milliers de m². La teinte du cercle est définie par une graduation pour chaque variable calculée (COVB, PFO, O₃, PM₁₀) pour chaque arbre isolé en kg/arbre/année obtenue par une division en parts égales (décile) de toutes les espèces considérées. Les valeurs exactes pour chaque arbre isolée peuvent être consultées sur la carte.",
+  "tree_considered": "Arbre isolé existant considéré dans l’étude.",
+  "tree_not_considered": "Arbre isolé existant non considéré dans l’étude."
+
 }

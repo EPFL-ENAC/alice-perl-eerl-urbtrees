@@ -2,8 +2,8 @@
 import LayerSelector from '@/components/LayerSelector.vue'
 import MarkdownDialog from '@/components/MarkdownDialog.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
-import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
-import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew, mdiInformation } from '@mdi/js'
+import type { Parameters, LegendScale } from '@/utils/jsonWebMap'
+import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiRuler, mdiCircle, mdiCircleOutline, mdiOpenInNew, mdiInformation } from '@mdi/js'
 import type { SelectableGroupItem, SelectableItem, SelectableSingleItem, SpeciesItem } from '@/utils/layerSelector'
 import axios from 'axios'
 import { marked } from 'marked'
@@ -237,9 +237,6 @@ watch(species, () => {
         .then((data) => {
           // append selectable for each species read from the csv
           const speciesItem = data.selectableItems?.find((item) => item.id === 'species') as SelectableGroupItem
-          // find the most frequent specie and set it as the default one
-          const maxCount = Math.max(...species.value.map((item) => item['SPECIE TREE COUNT']))
-          const mostFrequentSpecies = species.value.find((item) => item['SPECIE TREE COUNT'] === maxCount)?.NOM_COMPLET_lat.toLowerCase().replace(' ', '_')
           const allGenus: string[] = []
           species.value.forEach((item) => {
             speciesItem.children.push({
@@ -251,7 +248,7 @@ watch(species, () => {
               legendImage: item.mean_PM10_kg && item.Net_O3 ? `${CDN_DATA_URL}/specie_${item.id}_graph.png` : undefined,
               measures: item.measures,
               genre: item.genus,
-              selected: item.id === mostFrequentSpecies // most common, default one
+              selected: false
             })
             data.popupLayerIds?.push(item.id)
             if (data.popupLayerIds && !data.popupLayerIds.includes(item.genus)) {
@@ -430,7 +427,7 @@ function welcomeClosed() {
           :label="$t('show_all_species')">
         </v-checkbox>
       </v-list-item>
-      <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiMapLegend">
+      <v-list-item v-if="selectedItemWithLegend" :prepend-icon="mdiRuler">
         <v-list-item-title>
           <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('measures') }}</span>
         </v-list-item-title>
@@ -516,6 +513,39 @@ function welcomeClosed() {
             </v-row>
           </v-card-text>
         </v-card>
+      </v-list-item>
+      <v-list-item :prepend-icon="mdiMapLegend">
+        <v-list-item-title>
+          <span :class="mobile ? 'text-subtitle-1' : 'text-h6'">{{ $t('legend') }}</span>
+        </v-list-item-title>
+      </v-list-item>
+      <v-list-item v-if="!drawerRail">
+        <v-row>
+          <v-col cols="2">
+            <v-icon :icon="mdiCircle" color="#482878" size="50"></v-icon>
+            <v-icon :icon="mdiCircle" color="#1f9e89" size="40" class="mt-1 ml-1 mr-1"></v-icon>
+            <v-icon :icon="mdiCircle" color="#fde725" size="30" class="mt-1 ml-2 mr-2"></v-icon>
+          </v-col>
+          <v-col cols="10">
+            <span class="text-caption text-grey-darken-1">{{ $t('tree_legend') }}</span>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="2" class="text-center">
+            <v-icon :icon="mdiCircle" color="grey" size="30"></v-icon>
+          </v-col>
+          <v-col cols="10">
+            <span class="text-caption text-grey-darken-1">{{ $t('tree_considered') }}</span>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="2" class="text-center">
+            <v-icon :icon="mdiCircleOutline" color="grey" size="30"></v-icon>
+          </v-col>
+          <v-col cols="10">
+            <span class="text-caption text-grey-darken-1">{{ $t('tree_not_considered') }}</span>
+          </v-col>
+        </v-row>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>

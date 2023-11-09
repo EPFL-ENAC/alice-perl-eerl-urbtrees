@@ -61,14 +61,10 @@ function updateGenus() {
 }
 
 watch(() => props.items,
-  (value: SelectableItem[]) => {
-    // init with declared species
-    const speciesGroup = value.find((item: SelectableItem) => item.id === 'species') as SelectableGroupItem
-    if (speciesGroup) {
-      // find the genre of the default species
-      genre.value = speciesGroup.children.find((item) => item.selected)?.genre
-      updateGenus()
-    }
+  () => {
+    // all selected by default
+    genre.value = 'all'
+    updateGenus()
   },
   { immediate: true }
 )

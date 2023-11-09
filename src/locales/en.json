@@ -42,5 +42,9 @@
   "other": "Unknown",
   "show_all_species": "Show position of each tree in the genus",
   "all_genus": "(all genus)",
-  "start": "Start"
+  "start": "Start",
+  "legend": "Legend",
+  "tree_legend": "Singular tree visualized by its total leaf area (sum of every leaf) converted to an abstract circle. The total leaf area generally doesn’t match the crown area. The tint is defined by a graduation on each calculated variable (BVOC, OFP, O₃, PM₁₀) for each singular tree in kg/tree/year obtained by equal parts division (decile) of all considered species. The numeric values for any singular tree can be viewed by clicking on a colored circle.",
+  "tree_considered": "Existing singular tree considered in the study.",
+  "tree_not_considered": "Existing singular tree not considered in the study."
 }
