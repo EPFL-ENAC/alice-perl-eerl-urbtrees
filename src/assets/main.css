@@ -38,9 +38,14 @@ html {
   border-bottom: 0px solid white;
 }
 
+.scale-caption {
+  min-width: 200px;
+}
+
 .scale-caption-title {
   text-wrap: nowrap;
 }
+
 
 a {
   color: #000000;

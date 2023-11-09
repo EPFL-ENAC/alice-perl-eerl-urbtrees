@@ -104,8 +104,8 @@
     {
       "id": "ofp",
       "title": "Ozone formation potential",
-      "titleStart": "more emissions",
-      "titleEnd": "less emissions",
+      "titleStart": "more ozone formed",
+      "titleEnd": "less ozone formed",
       "unit": "kg/year",
       "scale": [
         {
