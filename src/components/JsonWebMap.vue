@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LayerSelector from '@/components/LayerSelector.vue'
+import MarkdownDialog from '@/components/MarkdownDialog.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
 import type { Parameters, LegendScale, ScaleEntry } from '@/utils/jsonWebMap'
 import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiBookOpenPageVariant, mdiOpenInNew, mdiInformation } from '@mdi/js'
@@ -13,6 +14,7 @@ import { useI18n } from 'vue-i18n'
 import type { StyleSpecification } from 'maplibre-gl'
 // @ts-ignore
 import Papa from 'papaparse'
+import { useCookies } from 'vue3-cookies'
 
 const props = defineProps<{
   styleUrl: string
@@ -25,6 +27,7 @@ const CDN_DATA_URL = `${props.cdnUrl}/data`
 const MARTIN_URL = props.martinUrl
 
 const { t, locale } = useI18n({ useScope: 'global' })
+const { cookies } = useCookies()
 
 const map = ref<InstanceType<typeof MapLibreMap>>()
 const selector = ref<InstanceType<typeof LayerSelector>>()
@@ -281,6 +284,8 @@ watch(species, () => {
     })
 })
 
+const openWelcome = computed<boolean>(() => cookies.get('welcome') !== '1')
+
 const singleItems = computed<SelectableSingleItem[]>(() =>
   (parameters.value?.selectableItems ?? [])
     .filter((item: SelectableItem) => item.id !== 'theme')
@@ -389,6 +394,10 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = formatNumber((sel as any)[field])
   return val
+}
+
+function welcomeClosed() {
+  cookies.set('welcome','1', '365d');
 }
 
 </script>
@@ -571,6 +580,8 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
     </v-dialog>
 
   </v-container>
+  <markdown-dialog :button-text="$t('start')" :content-url="`welcome_${locale}.md`" :open="openWelcome" width="800px" @dialog-close="welcomeClosed">
+  </markdown-dialog>
 </template>
 
 <style lang="scss">
