@@ -232,9 +232,9 @@ watch(
             const makeSelectSpecieLink = (text: string) => {
               const aContainer = document.createElement("a");
               aContainer.href = "#";
-              aContainer.classList.add("ml-1");
+              aContainer.classList.add("ml-2", "v-btn", "v-btn--variant-outlined", "v-theme--light", "v-btn--density-default", "v-btn--size-x-small");
               aContainer.onclick = () => selectSpecie(`${genus}:${specie}`);
-              aContainer.innerText = `(${text})`
+              aContainer.innerText = `${text}`
               return aContainer;
             }
 
