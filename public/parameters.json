@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/EPFL-ENAC/alice-perl-eerl-urbtrees/main/schema/parameters.schema.json",
-  "center": { "lat": 46.20, "lng": 6.17 },
-  "zoom": 12,
+  "center": { "lat": 46.2046, "lng": 6.1338 },
+  "zoom": 14,
   "legendScales": [
     {
       "id": "voc",
