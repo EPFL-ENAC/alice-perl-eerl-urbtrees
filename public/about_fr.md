@@ -1,19 +1,17 @@
 ## À propos
 
-URBTREES
+### Le Projet Urbtrees 
 
-Identifier les avantages des arbres urbains pour la planification de solutions basées sur la nature : du refroidissement urbain aux services socioculturels
+Le projet de recherche Urbtrees est une collaboration originale entre trois laboratoires de la faculté de l’Environnement Naturel Architectural et Construit (ENAC) de l’EPFL : [PERL](https://www.epfl.ch/labs/perl/) (Plant Ecology Research Laboratory), [EERL](https://www.epfl.ch/labs/eerl/) (Extreme Environments Research Laboratory) et [ALICE](https://www.epfl.ch/labs/alice/) (Atelier de la Conception de l’Espace) visant à quantifier et cartographier les interactions des arbres isolés du canton de Genève avec leur environnement du point de vue de la physiologie des arbres, de la chimie atmosphérique et de la conception urbaine. 
 
-### Motivation
+Cette démarche se décline en plusieurs pistes d’études indépendantes se concentrant respectivement sur l’effet rafraichissant des arbres (PERL), le dessin et la cartographie des arbres (ALICE) et l’impact des arbres sur la qualité de l’air (EERL). Cette plateforme présente les résultats liés à la qualité de l’air cartographiés sur l’ensemble du territoire genevois. 
 
-Les solutions basées sur la nature, telles que la plantation d'arbres urbains, contribuent de manière significative à l'atténuation des problèmes liés au climat dans les villes, notamment les îlots de chaleur urbains, la pollution atmosphérique et la perte de la multifonctionnalité des écosystèmes. Cependant, l'efficacité des arbres pour des services écosystémiques spécifiques tels que le refroidissement thermique et l'impact sur la pollution de l'air reste largement théorique, ce qui nuit à notre capacité à gérer, restaurer et développer durablement les écosystèmes urbains. En outre, les évaluations fragmentaires des services écosystémiques urbains tels que ceux dérivés de la population d'arbres d'une ville limitent les possibilités de solutions basées sur la nature, tout en entravant la participation sociale dans leurs processus de planification en raison du manque d'informations compréhensibles sur les avantages au niveau des citoyens.
+### Equipe Urbtrees / Qualité de l’air 
 
-En utilisant la ville de Genève comme plate-forme de test, nos objectifs sont (1) d'établir le lien entre la variabilité climatique, la transpiration des arbres et le potentiel de refroidissement urbain pour un large éventail d'espèces d'arbres dans divers milieux urbains (physiologie des arbres), (2) de mesurer et cartographier la production de particules urbaines, la production d'ozone et de pollen à partir d'arbres à haute résolution temporelle pour modéliser l'effet des arbres en tant que puits de dépôt (chimie atmosphérique), et (3) de procéder à une évaluation contributive et à une cartographie numérique des services écosystémiques socioculturels dérivés de la population d'arbres genevois afin d'aborder leur évaluation actuelle et d'établir les futures méthodologies de planification (sciences sociales urbaines et conception urbaine/architecturale).
+Donato Kofel ([EERL](https://www.epfl.ch/labs/eerl/))
 
-Grâce à une combinaison de mesures de terrain à haute résolution, de modélisation et d'ateliers de contribution dans les domaines de l'écologie végétale, de la chimie atmosphérique et des sciences sociales urbaines, nous espérons que notre travail conduira à l'élaboration de stratégies de solutions basées sur la nature pour nos villes, où les facteurs environnementaux, socioculturels et d'infrastructure sont pleinement pris en compte.
+Ilann Bourgeois ([PERL](https://www.epfl.ch/labs/perl/))
 
-#### Crédits
+Aurèle Pulfer ([ALICE](https://www.epfl.ch/labs/alice/))
 
-Projet: [Charlotte Grossiord](https://people.epfl.ch/charlotte.grossiord) (PERL / IIE) and [Dieter Dietz](https://people.epfl.ch/dieter.dietz) (ALICE / IA) and [Julia Schmale](https://people.epfl.ch/julia.schmale) (EERL / IIE)
-
-Application web: [EPFL ENACIT4Research](https://www.epfl.ch/schools/enac/about/data-at-enac/enac-it4research/)
+Application web: [EPFL ENACIT4Research](https://www.epfl.ch/schools/enac/fr/a-propos/data-a-lenac/enac-it4research-fr/)
