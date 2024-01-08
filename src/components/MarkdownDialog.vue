@@ -4,6 +4,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useDisplay } from 'vuetify'
 import { onMounted, ref } from 'vue'
+import { watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -28,6 +29,19 @@ const dialog = ref<boolean>(false)
 const { mobile } = useDisplay()
 const contentHtml = ref<string>('')
 
+watch(() => props.open, (open) => {
+  dialog.value = open
+})
+
+watch(() => props.contentUrl, (contentUrl) => {
+  axios
+    .get<string>(contentUrl)
+    .then((response) => response.data)
+    .then((data) => {
+      contentHtml.value = DOMPurify.sanitize(marked.parse(data, {headerIds: false, mangle: false}))
+    })
+})
+
 onMounted(() => {
   if (props.open) {
     dialog.value = true;
@@ -47,7 +61,7 @@ function close() {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" :width="width" :fullscreen="mobile">
+  <v-dialog v-model="dialog" :width="width" :fullscreen="mobile" @update:model-value="emit('dialogClose')">
     <v-card class="text-justify">
       <v-card-title v-if="name">{{ name }}</v-card-title>
       <v-card-text>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import LayerSelector from '@/components/LayerSelector.vue'
-import MarkdownDialog from '@/components/MarkdownDialog.vue'
 import MapLibreMap from '@/components/MapLibreMap.vue'
 import type { Parameters, LegendScale } from '@/utils/jsonWebMap'
 import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiLayers, mdiMapLegend, mdiRuler, mdiCircle, mdiCircleOutline, mdiOpenInNew, mdiInformation } from '@mdi/js'
@@ -281,8 +280,6 @@ watch(species, () => {
     })
 })
 
-const openWelcome = computed<boolean>(() => cookies.get('welcome') !== '1')
-
 const singleItems = computed<SelectableSingleItem[]>(() =>
   (parameters.value?.selectableItems ?? [])
     .filter((item: SelectableItem) => item.id !== 'theme')
@@ -391,10 +388,6 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
   const field = `sum_${measure === 'voc' ? 'BVOC' : measure.toUpperCase()}_kg`
   const val = formatNumber((sel as any)[field])
   return val
-}
-
-function welcomeClosed() {
-  cookies.set('welcome','1', '365d');
 }
 
 </script>
@@ -610,8 +603,6 @@ function welcomeClosed() {
     </v-dialog>
 
   </v-container>
-  <markdown-dialog :button-text="$t('start')" :content-url="`welcome_${locale}.md`" :open="openWelcome" width="800px" @dialog-close="welcomeClosed">
-  </markdown-dialog>
 </template>
 
 <style lang="scss">

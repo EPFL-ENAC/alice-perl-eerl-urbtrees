@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import epflLogoUrl from '/EPFL_Logo_184X53.svg'
-import { mdiInformation } from '@mdi/js'
+import { mdiInformation, mdiHelpBox } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { useLocale } from 'vuetify'
 import { useCookies } from 'vue3-cookies'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import MarkdownDialog from '@/components/MarkdownDialog.vue'
 
 const showHome = ref<boolean>(false)
 const secret = ref<string>()
@@ -14,10 +15,23 @@ const { current } = useLocale()
 const { locale } = useI18n({ useScope: 'global' })
 const { cookies } = useCookies()
 
+const openWelcome = computed<boolean>(() => cookies.get('welcome') !== '1')
+const showWelcome = ref<boolean>(false)
+const welcomeOpened = computed<boolean>(() => openWelcome.value || showWelcome.value)
+
 function onLocale(lang: string) {
   locale.value = lang
   current.value = lang
   cookies.set('locale', lang, '365d')
+}
+
+function welcomeClosed() {
+  cookies.set('welcome','1', '365d');
+  showWelcome.value = false
+}
+
+function welcomeOpen() {
+  showWelcome.value = true
 }
 
 function getCurrentLocaleOrFallback() {
@@ -57,6 +71,7 @@ function onSecretChange() {
         </v-list-item>
       </v-list>
     </v-menu>
+      <v-btn :icon="mdiHelpBox" class="mr-3" @click="welcomeOpen()"></v-btn>
       <v-btn to="/about" :icon="mdiInformation" class="mr-3"></v-btn>
       <template #append>
         <a href="https://epfl.ch" target="_blank">
@@ -66,6 +81,8 @@ function onSecretChange() {
     </v-app-bar>
     <v-main v-if="showHome">
       <RouterView/>
+      <markdown-dialog :button-text="$t('start')" :content-url="`welcome_${locale}.md`" :open="welcomeOpened" width="800px" @dialog-close="welcomeClosed">
+      </markdown-dialog>
     </v-main>
     <v-main v-else>
       <div>
