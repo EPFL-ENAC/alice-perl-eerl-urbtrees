@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import epflLogoUrl from '/EPFL_Logo_184X53.svg'
-import { mdiInformation, mdiHelpBox } from '@mdi/js'
+import { mdiInformation, mdiPlayBox } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { useLocale } from 'vuetify'
 import { useCookies } from 'vue3-cookies'
@@ -71,7 +71,7 @@ function onSecretChange() {
         </v-list-item>
       </v-list>
     </v-menu>
-      <v-btn :icon="mdiHelpBox" class="mr-3" @click="welcomeOpen()"></v-btn>
+      <v-btn :icon="mdiPlayBox" class="mr-3" @click="welcomeOpen()"></v-btn>
       <v-btn to="/about" :icon="mdiInformation" class="mr-3"></v-btn>
       <template #append>
         <a href="https://epfl.ch" target="_blank">
