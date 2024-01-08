@@ -293,6 +293,19 @@ watch(
             tdContainer.innerText = t(fprops.leaf);
             trContainer.appendChild(tdContainer);
 
+            // D_COUR_M
+            trContainer = document.createElement("tr");
+            tbodyContainer.appendChild(trContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-caption", "font-weight-bold", "text-left", "pl-1", "pr-0");
+            tdContainer.innerText = t('crown_area');
+            tdContainer.appendChild(makeInfoLink("crown_area"));
+            trContainer.appendChild(tdContainer);
+            tdContainer = document.createElement("td");
+            tdContainer.classList.add("text-no-wrap", "pl-1", "pr-1");
+            tdContainer.innerText = formatNumber(Math.pow(fprops.D_COUR_M / 2, 2) * Math.PI, t('m2'));
+            trContainer.appendChild(tdContainer);
+
             trContainer = document.createElement("tr");
             tbodyContainer.appendChild(trContainer);
             tdContainer = document.createElement("td");

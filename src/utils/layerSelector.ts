@@ -93,6 +93,7 @@ export interface SpeciesProps {
   STATUT: string
   ID_ARBRE: number
   NO_INVENTA: string
+  D_COUR_M: number
   leaf: string
   gmax: number
   O3_rm_gy: number

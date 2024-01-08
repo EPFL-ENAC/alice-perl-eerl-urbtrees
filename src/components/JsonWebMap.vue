@@ -49,7 +49,7 @@ const allMeasures: string[] = [
   'voc', 'pm10', 'ofp', 'o3'
 ]
 const documentationIds: string[] = [
-  "genus", "specie", "graph", "leaf_type", "leaf_area", ...allMeasures
+  "genus", "specie", "graph", "leaf_type", "crown_area", "leaf_area", ...allMeasures
 ]
 
 const genusPaint = {
@@ -518,9 +518,12 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
             <v-icon :icon="mdiCircle" color="#482878" size="50"></v-icon>
             <v-icon :icon="mdiCircle" color="#1f9e89" size="40" class="mt-1 ml-1 mr-1"></v-icon>
             <v-icon :icon="mdiCircle" color="#fde725" size="30" class="mt-1 ml-2 mr-2"></v-icon>
+            <v-icon :icon="mdiCircleOutline" color="grey" size="30" class="mt-1 ml-2 mr-2"></v-icon>
           </v-col>
-          <v-col cols="10">
-            <span class="text-caption text-grey-darken-1">{{ $t('tree_legend') }}</span>
+          <v-col cols="10" class="text-caption text-grey-darken-1">
+            <div>{{ $t('tree_legend') }}</div>
+            <div>{{ $t('tree_legend_considered') }}</div>
+            <div>{{ $t('tree_legend_not_considered') }}</div>
           </v-col>
         </v-row>
         <v-row>
@@ -529,14 +532,6 @@ function getSpecieMeasureSumLabel(sel: SpeciesItem, measure: string) {
           </v-col>
           <v-col cols="10">
             <span class="text-caption text-grey-darken-1">{{ $t('tree_considered') }}</span>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="2" class="text-center">
-            <v-icon :icon="mdiCircleOutline" color="grey" size="30"></v-icon>
-          </v-col>
-          <v-col cols="10">
-            <span class="text-caption text-grey-darken-1">{{ $t('tree_not_considered') }}</span>
           </v-col>
         </v-row>
       </v-list-item>

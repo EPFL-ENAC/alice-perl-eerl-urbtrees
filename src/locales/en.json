@@ -30,6 +30,7 @@
   "Aerial": "Aerial",
   "municipality": "Municipality",
   "leaf_type": "Leaf type",
+  "crown_area": "Crown area",
   "leaf_area": "Leaf area",
   "deciduous": "Deciduous",
   "evergreen": "Evergreen",
@@ -46,7 +47,8 @@
   "all_genus": "(all genus)",
   "start": "Start",
   "legend": "Legend",
-  "tree_legend": "Singular tree visualized by its total leaf area (sum of every leaf) converted to an abstract circle. The total leaf area generally doesn’t match the crown area. The tint is defined by a graduation on each calculated variable (BVOC, OFP, O₃, PM₁₀) for each singular tree in kg/tree/year obtained by equal parts division (decile) of all considered species. The numeric values for any singular tree can be viewed by clicking on a colored circle.",
-  "tree_considered": "Existing singular tree considered in the study.",
-  "tree_not_considered": "Existing singular tree not considered in the study."
+  "tree_legend": "Singular tree visualized by its total leaf area (sum of every leaf) converted to an abstract circle. The total leaf area generally doesn’t match the crown area.",
+  "tree_legend_considered": "The tint is defined by a graduation on each calculated variable (BVOC, OFP, O₃, PM₁₀) for each singular tree in kg/tree/year obtained by equal parts division (decile) of all considered species. The numeric values for any singular tree can be viewed by clicking on a colored circle.",
+  "tree_legend_not_considered": "No tint indicates that the variable was not considered in the study for the tree.",
+  "tree_considered": "Existing singular tree considered in the study. The diametre is the one the tree crown."
 }

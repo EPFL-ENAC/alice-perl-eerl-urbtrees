@@ -30,6 +30,7 @@
   "Aerial": "Aérien",
   "municipality": "Commune",
   "leaf_type": "Type de feuillage",
+  "crown_area": "Surface de la couronne",
   "leaf_area": "Surface totale des feuilles",
   "VOC g/year": "Émission de composés organiques volatiles g/année",
   "O3 g/year": "Filtration d'ozone g/année",
@@ -50,8 +51,9 @@
   "all_genus": "(tous les genres)",
   "start": "Commencer",
   "legend": "Légende",
-  "tree_legend": "Arbre isolé représenté par sa surface totale de feuillage (somme de chaque feuille) convertie en cercle abstrait. Ce cercle ne correspond pas au diamètre de la couronne : pour des arbres anciens, la surface totale de feuillage peut atteindre plusieurs milliers de m². La teinte du cercle est définie par une graduation pour chaque variable calculée (COVB, PFO, O₃, PM₁₀) pour chaque arbre isolé en kg/arbre/année obtenue par une division en parts égales (décile) de toutes les espèces considérées. Les valeurs exactes pour chaque arbre isolée peuvent être consultées sur la carte.",
-  "tree_considered": "Arbre isolé existant considéré dans l’étude.",
-  "tree_not_considered": "Arbre isolé existant non considéré dans l’étude."
+  "tree_legend": "Arbre isolé représenté par sa surface totale de feuillage (somme de chaque feuille) convertie en cercle abstrait. Ce cercle ne correspond pas au diamètre de la couronne : pour des arbres anciens, la surface totale de feuillage peut atteindre plusieurs milliers de m².",
+  "tree_legend_considered": "La teinte du cercle est définie par une graduation pour chaque variable calculée (COVB, PFO, O₃, PM₁₀) pour chaque arbre isolé en kg/arbre/année obtenue par une division en parts égales (décile) de toutes les espèces considérées. Les valeurs exactes pour chaque arbre isolée peuvent être consultées sur la carte.",
+  "tree_legend_not_considered": "L'absence de teinte indique que la variable n'a pas été considérée dans l’étude pour cet arbre.",
+  "tree_considered": "Arbre isolé existant considéré dans l’étude. Le diamètre est celui de la couronne de l'arbre."
 
 }
