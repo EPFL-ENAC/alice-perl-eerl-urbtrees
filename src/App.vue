@@ -71,8 +71,8 @@ function onSecretChange() {
         </v-list-item>
       </v-list>
     </v-menu>
-      <v-btn :icon="mdiPlayBox" class="mr-3" @click="welcomeOpen()"></v-btn>
-      <v-btn to="/about" :icon="mdiInformation" class="mr-3"></v-btn>
+      <v-btn :icon="mdiPlayBox" class="mr-3" @click="welcomeOpen()" :title="$t('introduction')"></v-btn>
+      <v-btn to="/about" :icon="mdiInformation" class="mr-3" :title="$t('about')"></v-btn>
       <template #append>
         <a href="https://epfl.ch" target="_blank">
           <v-img :src="epflLogoUrl" width="100px" />
