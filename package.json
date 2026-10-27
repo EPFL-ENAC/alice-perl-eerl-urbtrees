@@ -19,7 +19,7 @@
     "@types/dompurify": "^3.0.2",
     "@types/marked": "^5.0.0",
     "axios": "^1.3.4",
-    "dompurify": "^3.0.4",
+    "dompurify": "^3.4.17",
     "events": "^3.3.0",
     "maplibre-gl": "^3.5.1",
     "maplibregl-scale-legend": "github:EPFL-ENAC/maplibregl-scale-legend#1.1.0",
